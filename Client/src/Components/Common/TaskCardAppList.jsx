@@ -37,7 +37,7 @@ export default function TaskCardAppList() {
           position: "absolute",
           top: -27,
           right: 12,
-          backgroundColor: "#FBCFE8", 
+          backgroundColor: "#FBCFE8",
           color: "#7A2040",
           fontSize: 13,
           px: 2.3,
@@ -45,10 +45,11 @@ export default function TaskCardAppList() {
           borderRadius: 2,
           boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
           fontWeight: 600,
+          letterSpacing: 0.5,
           zIndex: 0,
         }}
       >
-        MAIN
+        Main
       </Box>
 
       {/* Main card */}
@@ -170,7 +171,7 @@ export default function TaskCardAppList() {
                     transition: "all 0.2s",
                   }}
                 >
-                  <DeleteOutlineIcon  fontSize="small" />
+                  <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
 
                 <IconButton
@@ -188,7 +189,11 @@ export default function TaskCardAppList() {
           </Box>
         </CardContent>
       </Card>
-      <DeleteDialog open={isOpenDialog} handleClose={handleDialog } onConfirm={isOpenDialog} />
+      <DeleteDialog
+        open={isOpenDialog}
+        handleClose={handleDialog}
+        onConfirm={isOpenDialog}
+      />
     </Box>
   );
 }

@@ -3,9 +3,12 @@ import {
   Typography,
   IconButton,
   Chip,
-  Paper,
+  Card,
+  CardContent,
+  CardActions,
   Stack,
 } from "@mui/material";
+
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import StarIcon from "@mui/icons-material/Star";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,7 +23,7 @@ const TaskCardFormatList = () => {
           position: "absolute",
           top: -18,
           right: 24,
-          backgroundColor: "#FBCFE8", // Light pink
+          backgroundColor: "#FBCFE8",
           color: "#7A2040",
           fontSize: 13,
           px: 2.2,
@@ -28,41 +31,38 @@ const TaskCardFormatList = () => {
           borderRadius: 2,
           boxShadow: "0 3px 6px rgba(0,0,0,0.15)",
           fontWeight: 600,
-          zIndex: 2,
-          textTransform: "uppercase",
           letterSpacing: 0.5,
+          zIndex: 1000,
         }}
       >
         Main
       </Box>
 
-      {/* Main card */}
-      <Paper
+      {/* Main Card */}
+      <Card
         elevation={4}
         sx={{
           background: "linear-gradient(145deg, #6D28D9, #8B5CF6)",
           color: "white",
           borderRadius: 3,
-          p: 2.5,
+          p: 0,
           mb: 2,
-          transition: "transform 0.2s ease, box-shadow 0.3s ease",
           "&:hover": {
-            transform: "translateY(-4px)",
             boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
           },
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.3,
         }}
       >
-        {/* Title and description */}
-        <Box sx={{ flex: 1 }}>
+        {/* Content */}
+        <CardContent sx={{ pb: 1.5 }}>
+          {/* Title */}
           <Typography
             variant="subtitle1"
             sx={{ fontWeight: "bold", fontSize: 16 }}
           >
             Something
           </Typography>
+
+          {/* Description */}
           <Box
             sx={{
               mt: 0.5,
@@ -87,24 +87,28 @@ const TaskCardFormatList = () => {
               soluta deleniti repellendus non incidunt distinctio corrupti.
             </Typography>
           </Box>
-        </Box>
+        </CardContent>
 
-        {/* Footer: date + status + icons */}
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ mt: 1 }}
+        {/* Footer / Actions */}
+        <CardActions
+          sx={{
+            px: 2,
+            pb: 2.2,
+            pt: 0,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
           {/* Date */}
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
             <CalendarMonthIcon sx={{ fontSize: 18 }} />
             <Typography variant="body2" sx={{ fontSize: 13.5 }}>
               10/19/2024
             </Typography>
           </Stack>
 
-          {/* Right side: chip + icons */}
+          {/* Right side icons */}
           <Stack
             direction="row"
             alignItems="center"
@@ -130,52 +134,43 @@ const TaskCardFormatList = () => {
                 color: "#000",
                 fontWeight: 600,
                 borderRadius: "14px",
-                height: "26px",
+                height: 26,
                 fontSize: 13,
               }}
             />
+
             <IconButton
               size="small"
               sx={{
                 color: "#FACC15",
-                transition: "all 0.2s",
-                "&:hover": {
-                  color: "#FDE68A",
-                  transform: "scale(1.15)",
-                },
+                "&:hover": { color: "#FDE68A" },
               }}
             >
               <StarIcon fontSize="small" />
             </IconButton>
+
             <IconButton
               size="small"
               sx={{
                 color: "#EF4444",
-                transition: "all 0.2s",
-                "&:hover": {
-                  color: "#F87171",
-                  transform: "scale(1.15)",
-                },
+                "&:hover": { color: "#F87171" },
               }}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
+
             <IconButton
               size="small"
               sx={{
-                color: "#fff",
-                transition: "all 0.2s",
-                "&:hover": {
-                  color: "#E0E7FF",
-                  transform: "scale(1.15)",
-                },
+                color: "white",
+                "&:hover": { color: "#E0E7FF" },
               }}
             >
               <MoreVertIcon fontSize="small" />
             </IconButton>
           </Stack>
-        </Stack>
-      </Paper>
+        </CardActions>
+      </Card>
     </Box>
   );
 };
