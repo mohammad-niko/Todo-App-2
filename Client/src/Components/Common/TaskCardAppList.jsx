@@ -37,7 +37,7 @@ export default function TaskCardAppList() {
           position: "absolute",
           top: -27,
           right: 12,
-          backgroundColor: "#FBCFE8", // Light pink
+          backgroundColor: "#FBCFE8", 
           color: "#7A2040",
           fontSize: 13,
           px: 2.3,
@@ -45,7 +45,7 @@ export default function TaskCardAppList() {
           borderRadius: 2,
           boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
           fontWeight: 600,
-          zIndex: -1,
+          zIndex: 0,
         }}
       >
         MAIN
