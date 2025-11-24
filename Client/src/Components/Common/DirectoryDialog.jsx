@@ -19,7 +19,7 @@ export default function DirectoryDialog({ open, handleClose, info }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const { title, placeHolder, button } = info;
-console.log(info);
+
   const handleCreate = () => {
     console.log("Creating directory:", directoryName);
     handleClose();

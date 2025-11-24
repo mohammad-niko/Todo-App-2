@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   FormControl,
   IconButton,
   InputLabel,
@@ -98,6 +99,17 @@ function AllTasks() {
             borderRadius: 2,
           }}
         >
+          <Button
+            variant="contained"
+            sx={{
+              py: 1.5,
+              mr: 1,
+              display: { xl: "inline", sm: "none", md: "inline" },
+            }}
+          >
+            Add New Task
+          </Button>
+
           <FormControl
             variant="filled"
             size="small"
