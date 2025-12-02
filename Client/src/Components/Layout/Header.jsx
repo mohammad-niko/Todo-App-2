@@ -1,23 +1,22 @@
-import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import { Container } from "@mui/material";
 import Drawer from "./Drawer";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { changeThemeMode } from "../../Redux/Reducers/app.reducer";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -60,11 +59,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Header() {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const theme = useSelector((store) => store.App.theme);
+  const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleTheme = () => {
+    dispatch(changeThemeMode());
+  };
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -175,15 +180,21 @@ export default function Header() {
 
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {/* light and dark icons */}
-              <IconButton size="large" color="inherit">
-                <Badge color="error">
-                  <LightModeIcon />
-                  {/* <DarkModeIcon /> */}
-                </Badge>
+              <IconButton
+                size="large"
+                color="inherit"
+                onClick={handleTheme}
+                sx={{
+                  "&:hover": {
+                    color: " yellow",
+                  },
+                }}
+              >
+                <Badge>{theme ? <DarkModeIcon /> : <LightModeIcon />}</Badge>
               </IconButton>
 
               <IconButton size="large" color="inherit">
-                <Badge badgeContent={1} color="error">
+                <Badge badgeContent={1}>
                   <NotificationsIcon />
                 </Badge>
               </IconButton>

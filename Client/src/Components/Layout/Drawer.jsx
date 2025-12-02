@@ -1,10 +1,14 @@
-import * as React from "react";
-import PropTypes from "prop-types";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import LinearWithValueLabel from "../Common/ProgressTaskBar";
+import DirectoryDialog from "../Common/directoryForm/DirectoryDialog";
+import TaskFormDialog from "../Common/taskForm/AddTaskForm";
+// mui components:
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -19,15 +23,13 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { NavLink } from "react-router";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import LinearWithValueLabel from "../Common/ProgressTaskBar";
-import DirectoryDialog from "../Common/DirectoryDialog";
+import DeleteDialog from "../Common/DeleteDialog";
 
 const drawerWidth = 230;
+
 const addDialogInfo = {
   title: "Create New",
   placeHolder: "Enter a directory name...",
@@ -38,12 +40,21 @@ const editDialogInfo = {
   placeHolder: "",
   button: "Edit",
 };
+
 function ResponsiveDrawer() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [isClosing, setIsClosing] = React.useState(false);
-  const [directoriesOpen, setDirectoriesOpen] = useState(false);
-  const [directoreDailog, setDirectoreDailog] = useState(false);
-  const [dialogInfo, setDialogInfo] = useState(addDialogInfo);
+  const listDirectories = useSelector((store) => store.Directory.directory);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isOpenDirectoreDailog, setIsOpenDirectoreDailog] = useState(false);
+  const [editdialogInfo, setEditDialogInfo] = useState(addDialogInfo);
+  const [isOpenFormDialog, setIsOpenFormDialog] = useState(false);
+  const [directoriesOpen, setDirectoriesOpen] = useState(() => {
+    const savd = localStorage.getItem("directoryIsOpen");
+    return savd ? JSON.parse(savd) : false;
+  });
+  const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
+
   const sidebarItems = [
     { label: "All Tasks", path: "/", icon: <ListAltIcon /> },
     { label: "Important Tasks", path: "/important-task", icon: <StarIcon /> },
@@ -59,15 +70,37 @@ function ResponsiveDrawer() {
     },
   ];
 
-  const listDirectories = ["secondary"];
+  //handle delete Dialog:
+  const handleConfirmDeleteDialog = async (id, directoryName) => {
+    setIsOpenDeleteDialog(true);
+    setDeleteDialogInfo({
+      type: "directory",
+      title: "Are you sure?",
+      discription: "This directory will be deleted permanently.",
+      id: id,
+      name: directoryName,
+    });
+  };
+
+  function handleFormDialog() {
+    document.activeElement?.blur();
+    setIsOpenFormDialog(!isOpenFormDialog);
+  }
 
   function handleAddDialog() {
-    setDirectoreDailog(true);
-    setDialogInfo(addDialogInfo);
+    document.activeElement?.blur();
+    setIsOpenDirectoreDailog(true);
+    setEditDialogInfo(addDialogInfo);
   }
-  function handleEditDirectory(name) {
-    setDirectoreDailog(true);
-    setDialogInfo({ ...editDialogInfo, placeHolder: name });
+
+  function handleEditDirectory(id, name) {
+    document.activeElement?.blur();
+    setIsOpenDirectoreDailog(true);
+    setEditDialogInfo({
+      ...editDialogInfo,
+      placeHolder: name,
+      id,
+    });
   }
 
   const handleDrawerClose = () => {
@@ -86,7 +119,14 @@ function ResponsiveDrawer() {
   };
 
   const drawer = (
-    <div>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Header + Add button */}
       <Toolbar
         disableGutters
         sx={{
@@ -109,6 +149,7 @@ function ResponsiveDrawer() {
         </Typography>
 
         <Button
+          onClick={handleFormDialog}
           variant="contained"
           sx={{
             color: "white",
@@ -116,11 +157,9 @@ function ResponsiveDrawer() {
             px: 5,
             py: 0.5,
             borderRadius: 2,
-            width: "90%",
-            fontSize: "1rem",
             width: { xs: "100%", sm: "90%" },
+            fontSize: "1rem",
             transition: "all 0.3s ease",
-
             "&:hover": {
               backgroundColor: (theme) => theme.palette.primary.dark,
               transform: "translateY(-2px)",
@@ -132,7 +171,10 @@ function ResponsiveDrawer() {
           Add New Task
         </Button>
       </Toolbar>
+
       <Divider />
+
+      {/* Sidebar Main Items */}
       <List>
         {sidebarItems.map(({ label, path, icon }) => (
           <ListItem key={label} disablePadding>
@@ -166,128 +208,148 @@ function ResponsiveDrawer() {
           </ListItem>
         ))}
       </List>
+
       <Divider />
-      <List
+
+      {/* SCROLLABLE AREA */}
+      <Box
         sx={{
-          transition: "padding-left 0.25s ease",
-          pl: directoriesOpen ? 0.5 : 0,
+          flex: 1,
+          overflowY: "auto",
+          minHeight: 0,
+          pb: "55.2125px",
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(255,255,255,0.25)"
+                : "rgba(0,0,0,0.25)",
+            borderRadius: "10px",
+          },
         }}
       >
-        {/* --- Directories header --- */}
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => setDirectoriesOpen(!directoriesOpen)}>
-            <ListItemIcon
-              sx={{ minWidth: 40, width: directoriesOpen ? "0px" : "56px" }}
-            >
-              {directoriesOpen ? <KeyboardArrowDownIcon /> : <FolderOpenIcon />}
-            </ListItemIcon>
-            <ListItemText
-              primary="Directories"
-              slotProps={{
-                primary: {
-                  sx: { fontWeight: 500, fontSize: "1rem" },
-                },
-              }}
-            />
-          </ListItemButton>
-        </ListItem>
-
-        {/* --- Subdirectories --- */}
-        {directoriesOpen &&
-          listDirectories.map((name) => (
-            <ListItem
-              key={name}
-              disablePadding
-              sx={{
-                pl: 6,
-                py: 0.2,
+        <List sx={{ pl: directoriesOpen ? 0.5 : 0 }}>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                const newValue = !directoriesOpen;
+                setDirectoriesOpen(newValue);
+                localStorage.setItem(
+                  "directoryIsOpen",
+                  JSON.stringify(newValue)
+                );
               }}
             >
-              <ListItemButton
-                sx={{
-                  minHeight: 32,
-                  "&:hover": {
-                    "& .directory-actions-icon": { display: "flex" },
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                {directoriesOpen ? (
+                  <KeyboardArrowDownIcon />
+                ) : (
+                  <FolderOpenIcon />
+                )}
+              </ListItemIcon>
+              <ListItemText
+                primary="Directories"
+                slotProps={{
+                  primary: {
+                    sx: { fontWeight: 500, fontSize: "1rem" },
                   },
                 }}
-              >
+              />
+            </ListItemButton>
+          </ListItem>
+
+          {directoriesOpen && (
+            <ListItem disablePadding sx={{ pl: 6, py: 0.2 }}>
+              <ListItemButton component={NavLink} to="/directory/main">
                 <ListItemText
-                  primary={name}
+                  primary="Main"
                   slotProps={{
                     primary: {
-                      sx: {
-                        fontSize: "1rem",
-                        color: "text.secondary",
-                      },
+                      sx: { fontSize: "1rem", color: "text.secondary" },
                     },
                   }}
                 />
-                <ListItemIcon
-                  className="directory-actions-icon"
-                  sx={{
-                    minWidth: 32,
-                    display: "none",
-                  }}
-                >
-                  <IconButton
-                    size="small"
-                    aria-label="edit"
-                    sx={{ p: 0.3 }}
-                    onClick={() => handleEditDirectory(name)}
-                  >
-                    <EditIcon sx={{ fontSize: "1rem" }} />
-                  </IconButton>
-                  <IconButton size="small" aria-label="delete" sx={{ p: 0.3 }}>
-                    <DeleteIcon sx={{ fontSize: "1rem" }} />
-                  </IconButton>
-                </ListItemIcon>
               </ListItemButton>
             </ListItem>
-          ))}
+          )}
 
-        {directoriesOpen && (
-          <ListItem disablePadding sx={{ pl: 6, py: 0.2 }}>
-            <ListItemButton sx={{ minHeight: 32 }}>
-              <ListItemText
-                primary="main"
-                slotProps={{
-                  primary: {
-                    sx: {
-                      fontSize: "1rem",
-                      color: "text.secondary",
+          {directoriesOpen &&
+            listDirectories.map(({ id, directoryName, path }) => (
+              <ListItem key={id} disablePadding sx={{ pl: 6 }}>
+                <ListItemButton
+                  component={NavLink}
+                  to={path}
+                  sx={{
+                    position: "relative",
+                    "&:hover .directory-actions-icon": {
+                      display: "flex",
                     },
-                  },
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        )}
+                  }}
+                >
+                  <ListItemText
+                    primary={directoryName}
+                    slotProps={{
+                      primary: {
+                        sx: { fontSize: "1rem", color: "text.secondary" },
+                      },
+                    }}
+                  />
 
-        {/* --- Add new directory --- */}
-        {directoriesOpen && (
-          <ListItem disablePadding sx={{ pl: 5, py: 0.2 }}>
-            <ListItemButton onClick={handleAddDialog} sx={{ minHeight: 32 }}>
-              <ListItemIcon sx={{ minWidth: 32 }}>
-                <AddIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Add"
-                slotProps={{
-                  primary: {
-                    sx: {
-                      fontSize: "1rem",
-                      color: "text.secondary",
+                  <ListItemIcon
+                    className="directory-actions-icon"
+                    sx={{ minWidth: 32, display: "none" }}
+                  >
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleEditDirectory(id, directoryName);
+                      }}
+                    >
+                      <EditIcon sx={{ fontSize: "1rem" }} />
+                    </IconButton>
+
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleConfirmDeleteDialog(id, directoryName);
+                      }}
+                    >
+                      <DeleteIcon sx={{ fontSize: "1rem" }} />
+                    </IconButton>
+                  </ListItemIcon>
+                </ListItemButton>
+              </ListItem>
+            ))}
+
+          {directoriesOpen && (
+            <ListItem disablePadding sx={{ pl: 6 }}>
+              <ListItemButton onClick={handleAddDialog}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <AddIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Add"
+                  slotProps={{
+                    primary: {
+                      sx: { fontSize: "1rem", color: "text.secondary" },
                     },
-                  },
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        )}
-      </List>
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          )}
+        </List>
+      </Box>
 
+      {/* Progress Bar — stays bottom */}
       <LinearWithValueLabel />
-    </div>
+    </Box>
   );
 
   return (
@@ -302,13 +364,13 @@ function ResponsiveDrawer() {
       >
         <MenuIcon />
       </IconButton>
+
       <aside>
         <Box
           component="nav"
           sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-          aria-label="mailbox folders"
         >
-          {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
+          {/* Mobile Drawer */}
           <Drawer
             variant="temporary"
             open={mobileOpen}
@@ -317,27 +379,31 @@ function ResponsiveDrawer() {
             sx={{
               display: { xs: "block", sm: "none" },
               "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
                 width: drawerWidth,
                 backgroundColor: (theme) => theme.palette.customColors.drawerBg,
+                boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
               },
             }}
             slotProps={{
-              root: {
-                keepMounted: true, // Better open performance on mobile.
-              },
+              root: { keepMounted: true },
             }}
           >
             {drawer}
           </Drawer>
+
+          {/* Desktop Drawer */}
           <Drawer
             variant="permanent"
             sx={{
               display: { xs: "none", sm: "block" },
               "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
                 width: drawerWidth,
                 backgroundColor: (theme) => theme.palette.customColors.drawerBg,
+                boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
               },
             }}
             open
@@ -345,12 +411,25 @@ function ResponsiveDrawer() {
             {drawer}
           </Drawer>
         </Box>
-        <DirectoryDialog
-          open={directoreDailog}
-          handleClose={() => setDirectoreDailog(false)}
-          info={dialogInfo}
-        />
       </aside>
+
+      {/* Dialogs */}
+      <DirectoryDialog
+        handleClose={() => setIsOpenDirectoreDailog(false)}
+        info={editdialogInfo}
+        open={isOpenDirectoreDailog}
+        directoryList={listDirectories}
+      />
+      <DeleteDialog
+        info={deleteDialogInfo}
+        handleClose={() => setIsOpenDeleteDialog(false)}
+        open={isOpenDeleteDialog}
+      />
+      <TaskFormDialog
+        open={isOpenFormDialog}
+        handleClose={handleFormDialog}
+        info={{ type: "add", title: "Add New" }}
+      />
     </>
   );
 }

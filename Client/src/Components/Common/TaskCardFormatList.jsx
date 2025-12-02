@@ -8,13 +8,51 @@ import {
   CardActions,
   Stack,
 } from "@mui/material";
-
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import StarIcon from "@mui/icons-material/Star";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DeleteDialog from "./DeleteDialog";
+import { useDispatch } from "react-redux";
+import {
+  isCompletedTask,
+  isImportantTask,
+} from "../../Redux/Reducers/Task.reducer";
+import { useState } from "react";
+import TaskFormDialog from "./taskForm/AddTaskForm";
 
-const TaskCardFormatList = () => {
+const TaskCardFormatList = ({ data }) => {
+  const dispatch = useDispatch();
+  const { id, title, deadLine, description, directory, important, completed } =
+    data;
+  const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
+  const [isOpenFormDialog, setisOpenFormDialog] = useState("");
+  function handleImportant(id) {
+    dispatch(isImportantTask(id));
+  }
+
+  function handleCompleted(id) {
+    dispatch(isCompletedTask(id));
+  }
+
+  //handle delete Dialog:
+  const handelDeleteDialog = async () => {
+    setIsOpenDeleteDialog(true);
+    setDeleteDialogInfo({
+      type: "task",
+      id: id,
+      title: "Are you sure?",
+      discription: "This task will be deleted permanently.",
+    });
+  };
+
+  // handle edit dialog:
+  function handleFormDialog() {
+    document.activeElement?.blur();
+    setisOpenFormDialog(!isOpenFormDialog);
+  }
+
   return (
     <Box sx={{ position: "relative", width: "100%", pb: 2.5 }}>
       {/* "Main" label */}
@@ -35,7 +73,7 @@ const TaskCardFormatList = () => {
           zIndex: 1000,
         }}
       >
-        Main
+        {directory}
       </Box>
 
       {/* Main Card */}
@@ -59,7 +97,7 @@ const TaskCardFormatList = () => {
             variant="subtitle1"
             sx={{ fontWeight: "bold", fontSize: 16 }}
           >
-            Something
+            {title}
           </Typography>
 
           {/* Description */}
@@ -82,9 +120,7 @@ const TaskCardFormatList = () => {
               variant="body2"
               sx={{ opacity: 0.9, fontSize: 13.5, lineHeight: 1.5 }}
             >
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem
-              doloribus, tempora harum, quaerat, debitis aliquid labore eligendi
-              soluta deleniti repellendus non incidunt distinctio corrupti.
+              {description}
             </Typography>
           </Box>
         </CardContent>
@@ -104,7 +140,7 @@ const TaskCardFormatList = () => {
           <Stack direction="row" spacing={1} alignItems="center">
             <CalendarMonthIcon sx={{ fontSize: 18 }} />
             <Typography variant="body2" sx={{ fontSize: 13.5 }}>
-              10/19/2024
+              {deadLine}
             </Typography>
           </Stack>
 
@@ -128,9 +164,10 @@ const TaskCardFormatList = () => {
             }}
           >
             <Chip
-              label="Uncompleted"
+              label={completed ? "Completed" : "Uncompleted"}
+              onClick={() => handleCompleted(id)}
               sx={{
-                bgcolor: "#FDE68A",
+                bgcolor: completed ? "greenyellow" : "#FDE68A",
                 color: "#000",
                 fontWeight: 600,
                 borderRadius: "14px",
@@ -139,11 +176,13 @@ const TaskCardFormatList = () => {
               }}
             />
 
+            {/* important */}
             <IconButton
               size="small"
+              onClick={() => handleImportant(id)}
               sx={{
-                color: "#FACC15",
-                "&:hover": { color: "#FDE68A" },
+                color: important ? "#FACC15" : "",
+                "&:hover": "#FDE68A",
               }}
             >
               <StarIcon fontSize="small" />
@@ -151,15 +190,18 @@ const TaskCardFormatList = () => {
 
             <IconButton
               size="small"
+              onClick={() => handelDeleteDialog(id)}
               sx={{
                 color: "#EF4444",
-                "&:hover": { color: "#F87171" },
+                "&:hover": { color: "#F87171", transform: "scale(1.1)" },
+                transition: "all 0.2s",
               }}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
 
             <IconButton
+              onClick={() => handleFormDialog(id)}
               size="small"
               sx={{
                 color: "white",
@@ -171,6 +213,18 @@ const TaskCardFormatList = () => {
           </Stack>
         </CardActions>
       </Card>
+
+      {/* Dialogs */}
+      <DeleteDialog
+        info={deleteDialogInfo}
+        handleClose={() => setIsOpenDeleteDialog(false)}
+        open={isOpenDeleteDialog}
+      />
+      <TaskFormDialog
+        open={isOpenFormDialog}
+        handleClose={handleFormDialog}
+        info={{ type: "edit", title: "Edit", id: id }}
+      />
     </Box>
   );
 };

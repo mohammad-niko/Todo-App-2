@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import {
   Box,
   Typography,
@@ -11,21 +10,36 @@ import {
   DialogActions,
   Stack,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Switch,
   FormControlLabel,
   Chip,
   useTheme,
+  FormHelperText,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskFormSchema } from "./addTaskSchema";
-/* -------------------------------- Theme Helpers -------------------------------- */
+import { createTask, editTask } from "../../../Redux/Reducers/Task.reducer";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 
+/* -------------------------------- Make Date-------------------------------- */
+const formatDate = (date) => {
+  if (!date) return null;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+};
+
+/* -------------------------------- Theme Helpers -------------------------------- */
 const getBgDialog = (theme) =>
   theme.palette.customColors?.bgDialog || theme.palette.background.paper;
 
@@ -60,78 +74,78 @@ const filledStyles = (theme) => ({
 
 /* ----------------------------- Reusable TextField ----------------------------- */
 
-const FilledTextField = ({
-  label,
-  name,
-  shrink,
-  type,
-  onChange,
-  placeholder,
-  multiline,
-  rows,
-  inputRef,
-  customSX,
-  register,
-}) => {
-  const theme = useTheme();
-
-  return (
-    <TextField
-      label={label}
-      name={name}
-      type={type}
-      onChange={onChange}
-      variant="filled"
-      fullWidth
-      placeholder={placeholder}
-      multiline={multiline}
-      rows={rows}
-      inputRef={inputRef}
-      slotProps={{ inputLabel: { shrink: Boolean(shrink) } }}
-      sx={{
-        ...filledStyles(theme),
-        ...customSX,
-      }}
-    />
-  );
-};
-
 /* -------------------------------- Main Dialog -------------------------------- */
 
-export default function TaskFormDialog({ open, handleClose, onSubmit }) {
+export default function TaskFormDialog({ open, handleClose, info }) {
   const theme = useTheme();
-  const dateRef = useRef(null);
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(taskFormSchema(taskFormSchema())),
+  const dispatch = useDispatch();
+  const { type, title, id } = info;
+  const task =
+    type === "edit" &&
+    useSelector((store) => store.Task.task).find((t) => t.id === id);
+
+  const directorys = useSelector((store) => store.Directory.directory).map(
+    (d) => d.directoryName
+  );
+  const { control, handleSubmit, reset, watch } = useForm({
+    resolver: zodResolver(taskFormSchema(directorys)),
     defaultValues: {
       title: "",
       deadLine: null,
       description: "",
-      directory: "main",
+      directory: "Main",
       important: false,
       completed: false,
     },
   });
 
-  const { task, setTask } = onSubmit;
+  useEffect(() => {
+    if (open) {
+      if (type === "edit" && task) {
+        reset({
+          title: task.title,
+          deadLine: task.deadLine ? new Date(task.deadLine) : null,
+          description: task.description,
+          directory: task.directory,
+          important: task.important,
+          completed: task.completed,
+        });
+      } else if (type === "add") {
+        reset({
+          title: "",
+          deadLine: null,
+          description: "",
+          directory: "Main",
+          important: false,
+          completed: false,
+        });
+      }
+    }
+  }, [open, type, task, reset]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setTask((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-    onSubmit(task);
+  const onSubmit = (data) => {
+    if (type === "add") {
+      dispatch(
+        createTask({
+          ...data,
+          deadLine: formatDate(data.deadLine),
+          createdAt: formatDate(new Date()),
+        })
+      );
+    } else if (type === "edit") {
+      dispatch(
+        editTask({
+          id,
+          ...data,
+          deadLine: data.deadLine ? formatDate(data.deadLine) : task.deadLine,
+          createdAt: formatDate(new Date()),
+        })
+      );
+    }
     handleClose();
   };
+
+  const directory = watch("directory");
 
   return (
     <Dialog
@@ -157,7 +171,7 @@ export default function TaskFormDialog({ open, handleClose, onSubmit }) {
     >
       <Box
         component="form"
-        onSubmit={submitHandler}
+        onSubmit={handleSubmit(onSubmit)}
         sx={{ p: { xs: 2.5, sm: 3.5 } }}
       >
         {/* Header */}
@@ -173,28 +187,26 @@ export default function TaskFormDialog({ open, handleClose, onSubmit }) {
                 fontWeight={700}
                 sx={{ letterSpacing: 0.4 }}
               >
-                Add a Task
+                {title} Task
               </Typography>
 
-              {task.directory && (
-                <Chip
-                  icon={<FolderIcon />}
-                  label={task.directory}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    borderRadius: 1.5,
-                    bgcolor:
-                      theme.palette.mode === "light"
-                        ? "rgba(123, 63, 243, 0.12)"
-                        : "rgba(165, 132, 255, 0.18)",
-                    color:
-                      theme.palette.mode === "light"
-                        ? theme.palette.primary.main
-                        : theme.palette.primary.light,
-                  }}
-                />
-              )}
+              <Chip
+                icon={<FolderIcon />}
+                label={directory}
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  borderRadius: 1.5,
+                  bgcolor:
+                    theme.palette.mode === "light"
+                      ? "rgba(123, 63, 243, 0.12)"
+                      : "rgba(165, 132, 255, 0.18)",
+                  color:
+                    theme.palette.mode === "light"
+                      ? theme.palette.primary.main
+                      : theme.palette.primary.light,
+                }}
+              />
             </Stack>
 
             <IconButton
@@ -218,93 +230,141 @@ export default function TaskFormDialog({ open, handleClose, onSubmit }) {
         <DialogContent sx={{ px: 0, mt: 1 }}>
           <Stack spacing={3.2}>
             {/* Title */}
-            <FilledTextField
-              label="Title"
+            <Controller
               name="title"
-              shrink={task.title}
-              onChange={handleChange}
-              customSX={{
-                "& .MuiInputLabel-root.MuiInputLabel-shrink": {
-                  transform: "translate(12px, 0px) scale(0.80)",
-                },
-              }}
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Title"
+                  fullWidth
+                  variant="filled"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: Boolean(field.value),
+                    },
+                  }}
+                  sx={{
+                    ...filledStyles(theme),
+                    "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+                      transform: "translate(12px, 0px) scale(0.80)",
+                    },
+                  }}
+                />
+              )}
             />
 
             {/* Date */}
-            <FilledTextField
-              label="Date"
-              name="date"
-              type="date"
-              shrink={task.date}
-              onChange={handleChange}
-              inputRef={dateRef}
-              customSX={{
-                "& .MuiInputLabel-root.MuiInputLabel-shrink": {
-                  display: "none",
-                },
-              }}
-            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <Controller
+                name="deadLine"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <DatePicker
+                    {...field}
+                    label="Dead Line"
+                    value={field.value ?? null}
+                    onChange={(v) => field.onChange(v)}
+                    slotProps={{
+                      textField: {
+                        variant: "filled",
+                        fullWidth: true,
+                        name: field.name,
+                        error: !!fieldState.error,
+                        helperText: fieldState.error?.message,
+                        slotProps: {
+                          inputLabel: {
+                            shrink: Boolean(field.value),
+                          },
+                        },
+                        sx: {
+                          ...filledStyles(theme),
+                        },
+                      },
+                    }}
+                  />
+                )}
+              />
+            </LocalizationProvider>
 
             {/* Descripion */}
-            <FilledTextField
-              label="Description (optional)"
+            <Controller
               name="description"
-              shrink={task.description}
-              onChange={handleChange}
-              placeholder="Add more details..."
-              multiline
-              rows={3}
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  variant="filled"
+                  fullWidth
+                  label="Desciption (optional)"
+                  multiline
+                  rows={3}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  sx={{ ...filledStyles(theme) }}
+                />
+              )}
             />
 
             {/* Select */}
-            <FormControl variant="filled" fullWidth sx={filledStyles(theme)}>
-              <InputLabel shrink={Boolean(task.directory)}>
-                {task.directory ? "" : "Select directory"}
-              </InputLabel>
-              <Select
-                name="directory"
-                value={task.directory}
-                onChange={handleChange}
-                MenuProps={{
-                  slotProps: {
-                    paper: {
-                      sx: {
-                        bgcolor: getBgDialog(theme),
-                        borderRadius: 2,
-                        boxShadow: `0 8px 20px ${getAccentGlow(theme)}`,
+            <Controller
+              name="directory"
+              control={control}
+              render={({ field, fieldState }) => (
+                <FormControl
+                  variant="filled"
+                  fullWidth
+                  sx={{ ...filledStyles(theme) }}
+                  error={!!fieldState.error}
+                >
+                  <Select
+                    {...field}
+                    MenuProps={{
+                      slotProps: {
+                        paper: {
+                          sx: {
+                            bgcolor: getBgDialog(theme),
+                            borderRadius: 2,
+                            boxShadow: `0 8px 20px ${getAccentGlow(theme)}`,
+                          },
+                        },
                       },
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="Main">Main</MenuItem>
-                <MenuItem value="Work">Work</MenuItem>
-                <MenuItem value="Personal">Personal</MenuItem>
-              </Select>
-            </FormControl>
+                    }}
+                  >
+                    <MenuItem value="Main">Main</MenuItem>
+                    {directorys.map((d) => (
+                      <MenuItem value={d}>{d}</MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                </FormControl>
+              )}
+            />
 
             {/* Toggles */}
             <Stack direction="row" spacing={3}>
-              <FormControlLabel
-                label="Important"
-                control={
-                  <Switch
-                    checked={task.isImportant}
-                    onChange={handleChange}
-                    name="isImportant"
+              <Controller
+                name="important"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    label="Important"
+                    control={<Switch {...field} checked={field.value} />}
                   />
-                }
+                )}
               />
 
-              <FormControlLabel
-                label="Completed"
-                control={
-                  <Switch
-                    checked={task.isCompleted}
-                    onChange={handleChange}
-                    name="isCompleted"
+              <Controller
+                name="completed"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    label="Completed"
+                    control={<Switch {...field} checked={field.value} />}
                   />
-                }
+                )}
               />
             </Stack>
           </Stack>
@@ -334,7 +394,7 @@ export default function TaskFormDialog({ open, handleClose, onSubmit }) {
               textTransform: "none",
             }}
           >
-            Add New Task
+            {title} Task
           </Button>
         </DialogActions>
       </Box>

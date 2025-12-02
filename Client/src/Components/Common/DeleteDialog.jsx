@@ -9,16 +9,25 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
+import { removeDirectory } from "../../Redux/Reducers/directory.reducer";
+import { removeTask, removeTaskForDirectory } from "../../Redux/Reducers/Task.reducer";
+import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 
-export default function DeleteConfirmationDialog({
-  open,
-  handleClose,
-  onConfirm,
-}) {
+export default function DeleteDialog({ info, handleClose, open }) {
+  const dispatch = useDispatch();
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { id, title, discription, name, type } = info;
 
   const handleConfirm = () => {
-    onConfirm?.();
+    if (type === "directory") {
+      dispatch(removeDirectory(id));
+      dispatch(removeTaskForDirectory(name));
+      navigate("/");
+    } else if (type === "task") {
+      dispatch(removeTask(id));
+    }
     handleClose();
   };
 
@@ -57,7 +66,7 @@ export default function DeleteConfirmationDialog({
           color: theme.palette.text.primary,
         }}
       >
-        Are you sure?
+        {title}
         <IconButton
           aria-label="close"
           onClick={handleClose}
@@ -81,7 +90,7 @@ export default function DeleteConfirmationDialog({
             lineHeight: 1.6,
           }}
         >
-          This task will be deleted permanently.
+          {discription}
         </DialogContentText>
       </DialogContent>
 

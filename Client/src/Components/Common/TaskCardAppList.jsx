@@ -9,16 +9,46 @@ import {
 } from "@mui/material";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import StarIcon from "@mui/icons-material/Star";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useDispatch } from "react-redux";
+import {
+  isCompletedTask,
+  isImportantTask,
+} from "../../Redux/Reducers/Task.reducer";
 import { useState } from "react";
 import DeleteDialog from "./DeleteDialog";
+import TaskFormDialog from "./taskForm/AddTaskForm";
 
-export default function TaskCardAppList() {
-  const [isOpenDialog, setIsOpenDialog] = useState(false);
+export default function TaskCardAppList({ data }) {
+  const dispatch = useDispatch();
+  const { id, title, deadLine, description, directory, important, completed } =
+    data;
+  const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
+  const [isOpenFormDialog, setisOpenFormDialog] = useState("");
+  function handleImportant(id) {
+    dispatch(isImportantTask(id));
+  }
+  function handleCompleted(id) {
+    dispatch(isCompletedTask(id));
+  }
 
-  function handleDialog() {
-    setIsOpenDialog(!isOpenDialog);
+  //handle delete Dialog:
+  const handelDeleteDialog = async () => {
+    setIsOpenDeleteDialog(true);
+    setDeleteDialogInfo({
+      type: "task",
+      id: id,
+      title: "Are you sure?",
+      discription: "This task will be deleted permanently.",
+    });
+  };
+
+  // handle edit dialog:
+  function handleFormDialog() {
+    document.activeElement?.blur();
+    setisOpenFormDialog(!isOpenFormDialog);
   }
 
   return (
@@ -49,7 +79,7 @@ export default function TaskCardAppList() {
           zIndex: 0,
         }}
       >
-        Main
+        {directory}
       </Box>
 
       {/* Main card */}
@@ -57,7 +87,7 @@ export default function TaskCardAppList() {
         sx={{
           height: "100%",
           width: "100%",
-          background: "linear-gradient(145deg, #6D28D9, #8B5CF6)", // Soft purple gradient
+          background: "linear-gradient(145deg, #6D28D9, #8B5CF6)",
           color: "#fff",
           borderRadius: 3,
           pt: 3,
@@ -74,7 +104,7 @@ export default function TaskCardAppList() {
             variant="subtitle1"
             sx={{ fontWeight: "bold", mb: 0.8, fontSize: 16 }}
           >
-            Something
+            {title}
           </Typography>
 
           {/* Description */}
@@ -100,8 +130,7 @@ export default function TaskCardAppList() {
                 lineHeight: 1.5,
               }}
             >
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque
-              asperiores necessitatibus vitae non voluptatum rem repudiandae.
+              {description}
             </Typography>
           </Box>
 
@@ -116,7 +145,7 @@ export default function TaskCardAppList() {
             >
               <CalendarTodayOutlinedIcon sx={{ fontSize: 16 }} />
               <Typography sx={{ fontSize: 13.5, color: "white" }}>
-                10/19/2024
+                {deadLine}
               </Typography>
             </Stack>
 
@@ -137,9 +166,10 @@ export default function TaskCardAppList() {
             >
               {/* Status chip */}
               <Chip
-                label="Uncompleted"
+                label={completed ? "Completed" : "Uncompleted"}
+                onClick={() => handleCompleted(id)}
                 sx={{
-                  backgroundColor: "#FDE68A", // Yellow
+                  backgroundColor: completed ? "greenyellow" : "#FDE68A",
                   color: "#000",
                   fontWeight: 600,
                   height: 28,
@@ -152,9 +182,10 @@ export default function TaskCardAppList() {
               {/* Action icons */}
               <Stack direction="row" alignItems="center" spacing={0.6}>
                 <IconButton
+                  onClick={() => handleImportant(id)}
                   size="small"
                   sx={{
-                    color: "#FACC15",
+                    color: important ? "#FACC15" : "",
                     "&:hover": { color: "#FDE68A", transform: "scale(1.1)" },
                     transition: "all 0.2s",
                   }}
@@ -163,7 +194,7 @@ export default function TaskCardAppList() {
                 </IconButton>
 
                 <IconButton
-                  onClick={handleDialog}
+                  onClick={() => handelDeleteDialog(id)}
                   size="small"
                   sx={{
                     color: "#EF4444",
@@ -171,10 +202,11 @@ export default function TaskCardAppList() {
                     transition: "all 0.2s",
                   }}
                 >
-                  <DeleteOutlineIcon fontSize="small" />
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
 
                 <IconButton
+                  onClick={handleFormDialog}
                   size="small"
                   sx={{
                     color: "#fff",
@@ -189,10 +221,18 @@ export default function TaskCardAppList() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
       <DeleteDialog
-        open={isOpenDialog}
-        handleClose={handleDialog}
-        onConfirm={isOpenDialog}
+        info={deleteDialogInfo}
+        handleClose={() => setIsOpenDeleteDialog(false)}
+        open={isOpenDeleteDialog}
+      />
+
+      <TaskFormDialog
+        open={isOpenFormDialog}
+        handleClose={handleFormDialog}
+        info={{ type: "edit", title: "Edit", id: id }}
       />
     </Box>
   );

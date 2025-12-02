@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const taskFormSchema = () =>
+export const taskFormSchema = (dList) =>
   z.object({
     title: z.string().trim().min(1, { message: "Title is required" }),
     deadLine: z
@@ -13,7 +13,7 @@ export const taskFormSchema = () =>
       .string()
       .trim()
       .min(1, { message: "Desctiption is required" }),
-    directory: z.enum(["main", "personal", "work"], {
+    directory: z.enum(["Main", ...dList], {
       errorMap: () => ({ message: "Task directory is required" }),
     }),
     important: z.boolean(),

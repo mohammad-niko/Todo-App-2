@@ -1,9 +1,13 @@
-import React from 'react'
+import { useSelector } from "react-redux";
+import TaskListRenderer from "../../Components/Common/TaskListRenderer";
+
 
 function ImportantTask() {
-  return (
-    <div>ImportantPage</div>
-  )
+  const tasks = useSelector((store) => store.Task.task).filter(
+    (t) => t.important === true
+  );
+
+  return <TaskListRenderer tasks={tasks} />;
 }
 
-export default ImportantTask
+export default ImportantTask;

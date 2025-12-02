@@ -1,18 +1,27 @@
 import { Box, Paper, Typography, Stack, IconButton } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { useState } from "react";
+import FormDialog from "./taskForm/AddTaskForm";
 
 const AddNewTaskCardFormat = () => {
+  const [isOpenFormDialog, setIsOpenFormDialog] = useState(false);
+
+  function handleFormDialog() {
+    document.activeElement?.blur();
+    setIsOpenFormDialog(!isOpenFormDialog);
+  }
   return (
     <Box sx={{ position: "relative", width: "100%", pb: 2.5 }}>
       <Paper
         elevation={4}
+        onClick={handleFormDialog}
         sx={{
           borderRadius: 4,
           border: (theme) => `2px dashed ${theme.palette.primary.light}`,
           background: (theme) =>
             `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
           color: (theme) => theme.palette.text.secondary,
-          p: 3,
+          p: 1.5,
           mb: 2,
           cursor: "pointer",
           display: "flex",
@@ -73,6 +82,11 @@ const AddNewTaskCardFormat = () => {
           </Typography>
         </Stack>
       </Paper>
+      <FormDialog
+        open={isOpenFormDialog}
+        handleClose={handleFormDialog}
+        info={{ type: "add", title: "Add New" }}
+      />
     </Box>
   );
 };
