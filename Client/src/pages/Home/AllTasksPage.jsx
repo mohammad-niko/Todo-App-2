@@ -1,10 +1,12 @@
 import { useSelector } from "react-redux";
 import TaskListRenderer from "../../Components/Common/TaskListRenderer";
+import { useSearchParams } from "react-router";
 
 
 function AllTasks() {
-  const sortWith = useSelector((store) => store.App.sortBy);
   const tasks = useSelector((store) => store.Task.task);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortValue = searchParams.get("sort") || "";
 
   const sortList = (tasks, sort) => {
     const list = [...tasks];
@@ -17,9 +19,9 @@ function AllTasks() {
         return list.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-      case "deadlineAsc":
+      case "deadlineasc":
         return list.sort((a, b) => new Date(a.deadLine) - new Date(b.deadLine));
-      case "deadlineDesc":
+      case "deadlinedesc":
         return list.sort((a, b) => new Date(b.deadLine) - new Date(a.deadLine));
       case "completed":
         return list.sort((a, b) => b.completed - a.completed);
@@ -34,7 +36,7 @@ function AllTasks() {
     }
   };
 
-  return <TaskListRenderer tasks={sortList(tasks, sortWith)} />;
+  return <TaskListRenderer tasks={sortList(tasks, sortValue)} />;
 }
 
 export default AllTasks;

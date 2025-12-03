@@ -1,11 +1,11 @@
-import { Outlet, useLocation } from "react-router";
+import { Outlet, useLocation, useSearchParams } from "react-router";
 import Header from "../../Components/Layout/Header";
 import AddNewTaskCardApp from "../../Components/Common//AddNewTaskCardApp";
 import AddNewTaskCardFormat from "../../Components/Common/AddNewTaskCardFormat";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import TaskFormDialog from "../../Components/Common/taskForm/AddTaskForm";
-import { changeShowTask, SortByOption } from "../../Redux/Reducers/app.reducer";
+import { changeShowTask } from "../../Redux/Reducers/app.reducer";
 //Mui Components:
 import {
   Box,
@@ -31,10 +31,15 @@ function Home() {
   const isInDirectoryPage = location.pathname === "/";
   const routeName = location.pathname;
   const [sortBy, setSortBy] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("search");
+
   // handle change select Form (sort):
   const handelCahngeSortForm = (e) => {
     setSortBy(e.target.value);
-    dispatch(SortByOption(e.target.value));
+    e.target.value
+      ? setSearchParams({ sort: e.target.value })
+      : setSearchParams({});
   };
 
   // Extract and Capitalize Pathname:
@@ -45,23 +50,25 @@ function Home() {
     return match[0].replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
   };
 
-  const getPageType = (pathname) => {
-    if (pathname === "/") return { type: "all" };
-    if (pathname === "/important-task") return { type: "important" };
-    if (pathname === "/completed-task") return { type: "completed" };
-    if (pathname === "/uncompleted-task") return { type: "uncompleted" };
+  const getPageType = (pathName) => {
+    if (pathName === "/") return { type: "all" };
+    if (pathName === "/important-task") return { type: "important" };
+    if (pathName === "/completed-task") return { type: "completed" };
+    if (pathName === "/uncompleted-task") return { type: "uncompleted" };
+    if (pathName === "/result") return { type: "result" };
 
-    const match = pathname.match(/^\/directory\/(.+)/);
-    console.log(match[1]);
+    const match = pathName.match(/^\/directory\/(.+)/);
     if (match) return { type: "directory", name: convertPath(match[1]) };
 
     return { type: "unknown" };
   };
 
-  const numberOfTasks = (pathname) => {
-    const { type, name } = getPageType(pathname);
+  const numberOfTasks = (pathName) => {
+    const { type, name } = getPageType(pathName);
 
     switch (type) {
+      case "all":
+        return tasks.length;
       case "important":
         return tasks.filter((t) => t.important === true).length;
 
@@ -74,11 +81,16 @@ function Home() {
       case "directory":
         return tasks.filter((t) => t.directory === name).length;
 
-      case "all":
+      case "result":
+        return tasks.filter((t) =>
+          t.title.toLowerCase().includes(query.toLowerCase())
+        ).length;
+
       default:
-        return tasks.length;
+        return [].length;
     }
   };
+  const count = numberOfTasks(routeName);
 
   function handleFormDialog() {
     document.activeElement?.blur();
@@ -96,9 +108,13 @@ function Home() {
         }}
       >
         <Typography variant="h5" sx={{ pl: 4, pt: 3 }}>
-          {routeName === "/" ? "All tasks" : convertPath(routeName)} (
-          {numberOfTasks(routeName) + " "}
-          {numberOfTasks(routeName) > 1 ? "tasks" : "task"})
+          {count !== 0
+            ? `${
+                routeName === "/" ? "All tasks" : convertPath(routeName)
+              } (${count} ${count > 1 ? "tasks" : "task"})`
+            : routeName === "/"
+            ? "All tasks"
+            : convertPath(routeName)}
         </Typography>
         {/* //Toolbar: */}
         <Box
@@ -216,8 +232,8 @@ function Home() {
                   <MenuItem value="">None (Default)</MenuItem>
                   <MenuItem value="newest">Newest First</MenuItem>
                   <MenuItem value="oldest">Oldest First</MenuItem>
-                  <MenuItem value="deadlineAsc">Closest Deadline</MenuItem>
-                  <MenuItem value="deadlineDesc">Farthest Deadline</MenuItem>
+                  <MenuItem value="deadlineasc">Closest Deadline</MenuItem>
+                  <MenuItem value="deadlinedesc">Farthest Deadline</MenuItem>
                   <MenuItem value="completed">Completed First</MenuItem>
                   <MenuItem value="uncompleted">Uncompleted First</MenuItem>
                   <MenuItem value="important">Important First</MenuItem>

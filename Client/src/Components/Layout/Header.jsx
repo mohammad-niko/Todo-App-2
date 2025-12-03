@@ -15,19 +15,25 @@ import Drawer from "./Drawer";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { changeThemeMode } from "../../Redux/Reducers/app.reducer";
+import { useNavigate } from "react-router";
+import SearchDropdown from "../Common/SearchDropdown";
+import slugify from "slugify";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
+  display: "inline-flex",
+  flexDirection: "column",
+  width: "100%",
+  maxWidth: "100%",
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha("rgba(239, 246, 249)", 0.15),
+
   "&:hover": {
     backgroundColor: alpha("rgba(239, 246, 249)", 0.25),
   },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
+
   [theme.breakpoints.up("sm")]: {
     marginLeft: theme.spacing(3),
     width: "auto",
@@ -58,14 +64,64 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const debounce = (fn, delay) => {
+  let timer;
+
+  const debouncedFn = (arg) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn(arg);
+    }, delay);
+  };
+
+  debouncedFn.cancel = () => {
+    clearTimeout(timer);
+  };
+
+  return debouncedFn;
+};
+
 export default function Header() {
-  const theme = useSelector((store) => store.App.theme);
   const dispatch = useDispatch();
+  const theme = useSelector((store) => store.App.theme);
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-
+  const [searchValue, setSearchValue] = useState("");
+  const [valueDropdown, setValueDropdown] = useState("");
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const debouncedSearch = useMemo(() => {
+    return debounce((val) => {
+      setValueDropdown(val);
+    }, 500);
+  }, []);
+
+  function onSeeAllResults(trimmed) {
+    navigate(`/result?${new URLSearchParams({ search: trimmed })}`);
+    setSearchValue("");
+    setValueDropdown("");
+  }
+
+  function onResultClick({ title, id }) {
+    const slug = slugify(title, { lower: true });
+
+    navigate(`/task/${id}/${slug}`);
+    setSearchValue("");
+    setValueDropdown("");
+  }
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchField = (e) => {
+    setSearchValue(e.target.value);
+    debouncedSearch(e.target.value);
+  };
 
   const handleTheme = () => {
     dispatch(changeThemeMode());
@@ -151,8 +207,6 @@ export default function Header() {
     </Menu>
   );
 
-  // const date = new Date().toDateString().substring(4);
-
   return (
     <header>
       <Box sx={{ flexGrow: 1 }}>
@@ -170,8 +224,15 @@ export default function Header() {
                 <SearchIcon />
               </SearchIconWrapper>
               <StyledInputBase
+                value={searchValue}
+                onChange={handleSearchField}
                 placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
+                inputProps={{ "aria-label": "search", width: "100%" }}
+              />
+              <SearchDropdown
+                query={valueDropdown}
+                onSeeAllResults={onSeeAllResults}
+                onResultClick={onResultClick}
               />
             </Search>
 
