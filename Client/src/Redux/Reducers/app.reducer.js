@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const theme = localStorage.getItem("theme");
 const saved = localStorage.getItem("isList");
 const initialState = {
-  theme: true,
+  theme: theme ? JSON.parse(theme) : false,
   showTask: saved ? JSON.parse(saved) : false,
 };
 

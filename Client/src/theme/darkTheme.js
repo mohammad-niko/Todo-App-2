@@ -1,5 +1,5 @@
 import { createTheme, responsiveFontSizes } from "@mui/material";
-import baseTheme from "./baseTheme "
+import baseTheme from "./baseTheme ";
 
 let darkTheme = createTheme({
   ...baseTheme,
@@ -32,40 +32,47 @@ let darkTheme = createTheme({
     },
 
     customColors: {
-      appbarBg: "#1E293B",
+      appbarBg: "#0F172A",
       appbarText: "#E5E7EB",
       drawerBg: "#0F172A",
       bodyBg: "#0B1120",
       accentGlow: "#A584FF33",
       bgDialog: "#10162C",
     },
-  },
-
-  components: {
-   
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          color: "#E5E7EB",              
-          backgroundColor: "#10162C",    
-          "&.Mui-selected": {
-            backgroundColor: "#233150", 
-          },
-          "&:hover": {
-            backgroundColor: "#1E2A44",  
-          },
-        },
-      },
-    },
-
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#10162C",  
-        },
-      },
+    customNotFound: {
+      bg: "radial-gradient(circle at top, #1B2644 0%, #0D132B 80%)",
+      cardBg: "rgba(16, 22, 44, 0.35)",
+      border: "rgba(165,132,255,0.35)",
+      glow: "rgba(165,132,255,0.35)",
+      textPrimary: "#E5E7EB",
+      textSecondary: "#A5B4FC",
     },
   },
+
+  // components: {
+  //   MuiMenuItem: {
+  //     styleOverrides: {
+  //       root: {
+  //         color: "#E5E7EB",
+  //         backgroundColor: "#10162C",
+  //         "&.Mui-selected": {
+  //           backgroundColor: "#233150",
+  //         },
+  //         "&:hover": {
+  //           backgroundColor: "#1E2A44",
+  //         },
+  //       },
+  //     },
+  //   },
+
+  //   MuiPaper: {
+  //     styleOverrides: {
+  //       root: {
+  //         backgroundColor: "#10162C",
+  //       },
+  //     },
+  //   },
+  // },
 });
 
 darkTheme = responsiveFontSizes(darkTheme);

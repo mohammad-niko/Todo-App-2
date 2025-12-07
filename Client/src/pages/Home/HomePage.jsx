@@ -26,12 +26,12 @@ function Home() {
   const isList = useSelector((store) => store.App.showTask);
   const tasks = useSelector((store) => store.Task.task);
   const theme = useTheme();
-  const [isOpenFormDialog, setisOpenFormDialog] = useState("");
   const location = useLocation();
   const isInDirectoryPage = location.pathname === "/";
   const routeName = location.pathname;
+  const [isOpenFormDialog, setisOpenFormDialog] = useState("");
   const [sortBy, setSortBy] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams("");
   const query = searchParams.get("search");
 
   // handle change select Form (sort):
@@ -64,6 +64,7 @@ function Home() {
   };
 
   const numberOfTasks = (pathName) => {
+  
     const { type, name } = getPageType(pathName);
 
     switch (type) {
@@ -79,7 +80,7 @@ function Home() {
         return tasks.filter((t) => t.completed === false).length;
 
       case "directory":
-        return tasks.filter((t) => t.directory === name).length;
+        return tasks.filter((t) => t.directory.toLowerCase() === name.toLowerCase()).length;
 
       case "result":
         return tasks.filter((t) =>

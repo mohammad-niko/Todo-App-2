@@ -10,7 +10,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import { removeDirectory } from "../../Redux/Reducers/directory.reducer";
-import { removeTask, removeTaskForDirectory } from "../../Redux/Reducers/Task.reducer";
+import {
+  removeTask,
+  removeTaskForDirectory,
+} from "../../Redux/Reducers/Task.reducer";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 
@@ -39,8 +42,10 @@ export default function DeleteDialog({ info, handleClose, open }) {
         paper: {
           sx: {
             borderRadius: 3,
-            minWidth: 400,
-            p: 1,
+            width: "100%",
+            maxWidth: 400, 
+            mx: 1.5, 
+            p: { xs: 1, sm: 2 },
             backgroundImage: "none",
             bgcolor: theme.palette.customColors.bgDialog,
             boxShadow:

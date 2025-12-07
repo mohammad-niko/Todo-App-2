@@ -44,6 +44,14 @@ let lightTheme = createTheme({
       accentGlow: "#7B3FF333",
       bgDialog: "#F5F7FB",
     },
+    customNotFound: {
+      bg: "radial-gradient(circle at top, #E4E6F6 0%, #DCE1F1 80%)",
+      cardBg: "rgba(255,255,255,0.55)",
+      border: "rgba(123,63,243,0.45)",
+      glow: "rgba(123,63,243,0.25)",
+      textPrimary: "#333",
+      textSecondary: "#555",
+    },
   },
 });
 

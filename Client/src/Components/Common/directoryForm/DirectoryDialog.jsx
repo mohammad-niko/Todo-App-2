@@ -67,7 +67,9 @@ export default function DirectoryDialog({
         paper: {
           sx: {
             borderRadius: 4,
-            minWidth: 420,
+            width: "100%",
+            maxWidth: 420,
+            mx: 2,
             background: isDarkMode ? theme.palette.background.paper : "#fff",
             border: `1px solid ${
               isDarkMode ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"

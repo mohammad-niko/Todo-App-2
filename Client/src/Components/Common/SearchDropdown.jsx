@@ -10,15 +10,19 @@ import {
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { useSelector } from "react-redux";
+import { v4 as uuid } from "uuid";
 
 export default function SearchDropdown({
   query,
   onResultClick,
   onSeeAllResults,
+  handleNotFound
 }) {
   const theme = useTheme();
   const tasks = useSelector((store) => store.Task.task);
   const trimmed = query.trim();
+
+  if (!trimmed) return;
 
   const results =
     trimmed.length > 0
@@ -27,9 +31,11 @@ export default function SearchDropdown({
         )
       : [];
 
-  if (!trimmed || results.length === 0) return null;
+  const notfind = [
+    { id: uuid(), title: "Couldn't Find any task", deadLine: null },
+  ];
 
-  const displayedResults = results.slice(0, 4);
+  const displayedResults = results.length !== 0 ? results.slice(0, 4) : notfind;
 
   return (
     <Box
@@ -70,7 +76,10 @@ export default function SearchDropdown({
           {displayedResults.map((result, index) => (
             <React.Fragment key={result.id}>
               <ListItemButton
-                onClick={() => onResultClick(result)}
+                onClick={() => {
+                  if (results.length === 0) return handleNotFound();
+                  onResultClick(result);
+                }}
                 sx={{
                   py: 1.4,
                   px: 2,
@@ -90,7 +99,9 @@ export default function SearchDropdown({
                 {/* TITLE + DEADLINE */}
                 <ListItemText
                   primary={result.title}
-                  secondary={`Deadline: ${result.deadLine}`}
+                  secondary={
+                    results.length !== 0 && `Deadline: ${result.deadLine}`
+                  }
                   slotProps={{
                     primary: {
                       sx: {
@@ -116,32 +127,34 @@ export default function SearchDropdown({
           ))}
 
           {/* SEE ALL BUTTON */}
-          <Box
-            sx={{
-              p: 1,
-              textAlign: "center",
-              borderTop: `1px solid ${theme.palette.divider}`,
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? alpha("#1E293B", 0.5)
-                  : alpha("#EEF2F7", 0.6),
-            }}
-          >
-            <Button
-              color="primary"
-              fullWidth
-              onClick={() => onSeeAllResults(trimmed)}
+          {results.length !== 0 && (
+            <Box
               sx={{
-                textTransform: "none",
-                borderRadius: 1,
-                fontWeight: 600,
-                fontSize: "0.85rem",
-                py: 1,
+                p: 1,
+                textAlign: "center",
+                borderTop: `1px solid ${theme.palette.divider}`,
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? alpha("#1E293B", 0.5)
+                    : alpha("#EEF2F7", 0.6),
               }}
             >
-              All Results ({results.length}) For "{trimmed}"
-            </Button>
-          </Box>
+              <Button
+                color="primary"
+                fullWidth
+                onClick={() => onSeeAllResults(trimmed)}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 1,
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  py: 1,
+                }}
+              >
+                All Results ({results.length}) For "{trimmed}"
+              </Button>
+            </Box>
+          )}
         </List>
       </Paper>
     </Box>

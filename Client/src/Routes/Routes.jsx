@@ -6,6 +6,7 @@ import AllTasks from "../pages/Home/AllTasksPage";
 import DirectoryTasks from "../pages/Home/DirectoryPage";
 import SearchPage from "../pages/Home/SearchPage";
 import TaskDetails from "../pages/Home/TaskDetails";
+import NotFoundPage from "../pages/NotFound/NotFoundPage";
 
 const Routes = [
   {
@@ -20,6 +21,7 @@ const Routes = [
       { path: "/task/:id/:slug", element: <TaskDetails /> },
     ],
   },
+  { path: "*", element: <NotFoundPage /> },
 ];
 
 export default Routes;

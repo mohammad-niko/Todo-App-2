@@ -104,6 +104,11 @@ export default function Header() {
     setValueDropdown("");
   }
 
+  function handleNotFound() {
+    setSearchValue("");
+    setValueDropdown("");
+  }
+
   function onResultClick({ title, id }) {
     const slug = slugify(title, { lower: true });
 
@@ -124,6 +129,7 @@ export default function Header() {
   };
 
   const handleTheme = () => {
+    localStorage.setItem("theme", !theme);
     dispatch(changeThemeMode());
   };
 
@@ -233,6 +239,7 @@ export default function Header() {
                 query={valueDropdown}
                 onSeeAllResults={onSeeAllResults}
                 onResultClick={onResultClick}
+                handleNotFound={handleNotFound}
               />
             </Search>
 

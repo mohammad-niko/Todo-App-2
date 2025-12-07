@@ -36,6 +36,7 @@ export default function TaskCardAppList({ data }) {
 
   //handle delete Dialog:
   const handelDeleteDialog = async () => {
+    document.activeElement?.blur();
     setIsOpenDeleteDialog(true);
     setDeleteDialogInfo({
       type: "task",

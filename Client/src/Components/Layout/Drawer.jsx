@@ -358,7 +358,10 @@ function ResponsiveDrawer() {
         edge="start"
         color="inherit"
         aria-label="open drawer"
-        onClick={handleDrawerToggle}
+        onClick={() => {
+          document.activeElement?.blur();
+          handleDrawerToggle();
+        }}
         sx={{ mr: 2, display: { sm: "none" } }}
         size="large"
       >
