@@ -41,10 +41,14 @@ const directorySlice = createSlice({
       );
       if (index === -1) return;
 
+      const newPath = `/directory/${slugify(action.payload.newName, {
+        lower: true,
+      })}`;
+
       state.directory[index] = {
         ...state.directory[index],
         directoryName: capitalized,
-        path: `/directory/${action.payload.newName}`,
+        path: newPath,
       };
     },
   },
