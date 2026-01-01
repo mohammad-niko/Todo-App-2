@@ -19,6 +19,7 @@ export const registerUserSchema = z.object({
     .string()
     .trim()
     .nonempty({ error: "user name can't be empty" })
+    .min(8, { error: "full name can't be less than 8 char" })
     .max(15, { error: "user name can't be more than 15  char's" }),
   email: z
     .string()
