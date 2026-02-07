@@ -11,7 +11,6 @@ function SearchPage() {
       ? tasks.filter((t) => t.title.toLowerCase().includes(query.toLowerCase()))
       : [];
 
-
   return <TaskListRenderer tasks={results} />;
 }
 

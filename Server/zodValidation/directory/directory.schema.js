@@ -19,25 +19,24 @@ export const updateDirSchema = () =>
         .trim()
         .toLowerCase()
         .nonempty({ error: "Directory Name Is Required" }),
-      path: z.string().trim().nonempty({ error: "Path Is Required" }),
+      // path: z.string().trim().nonempty({ error: "Path Is Required" }),
     })
-    .superRefine((data, ctx) => {
-      if (!data.path.startsWith("/directory/")) {
-        return ctx.addIssue({
-          errors: "Path must start with /directory/",
-        });
-      }
+    // .superRefine((data, ctx) => {
+    //   if (!data.path.startsWith("/directory/")) {
+    //     return ctx.addIssue({
+    //       errors: "Path must start with /directory/",
+    //     });
+    //   }
 
-      const expectedPath = `/directory/${data.directoryName}`;
-      if (data.path !== expectedPath) {
-        return ctx.addIssue({
-          errors: `Path must be exactly ${expectedPath}`,
-        });
-      }
-    });
+    //   const expectedPath = `/directory/${data.directoryName}`;
+    //   if (data.path !== expectedPath) {
+    //     return ctx.addIssue({
+    //       errors: `Path must be exactly ${expectedPath}`,
+    //     });
+    //   }
+    // });
 
 export const dirIDSchema = () =>
   z.object({
     id: ObjectIdSchema,
   });
-

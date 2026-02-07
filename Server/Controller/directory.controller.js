@@ -1,11 +1,19 @@
 import { validUser } from "../common/utils/index.js";
 import dirModel from "../models/directory.model.js";
 
+const capitalized = (name) => {
+  return name[0].toUpperCase() + name.substring(1);
+};
+
 export const listDirs = async (req, res) => {
   try {
-    const { userID } = req.user;
-
-    validUser(userID);
+    const { _id } = req.user;
+    const userID = _id;
+    const vaildte = validUser(userID);
+    if (!vaildte)
+      return res
+        .status(404)
+        .json({ status: "fail", message: "user not't found" });
 
     const dirList = await dirModel.find({ userID: userID }).select("-__v");
 
@@ -20,14 +28,19 @@ export const listDirs = async (req, res) => {
 
 export const createDir = async (req, res) => {
   try {
-    const { userID } = req.params;
+    const { _id } = req.user;
     const { directoryName } = req.body;
+    const userID = _id;
 
-    validUser(userID);
+    const vaildte = validUser(userID);
+    if (!vaildte)
+      return res
+        .status(404)
+        .json({ status: "fail", message: "user not't found" });
 
     const createDir = await dirModel.create({
-      directoryName,
-      path: `/directory/${directoryName}`,
+      directoryName: capitalized(directoryName),
+      path: `/directory/${directoryName.toLowerCase()}`,
       userID: userID,
     });
 
@@ -44,9 +57,20 @@ export const createDir = async (req, res) => {
 
 export const updateDir = async (req, res) => {
   try {
-    const { userID } = req.user;
+    const { _id } = req.user;
+    const userID = _id;
     const { id } = req.params;
-    const paylaoud = req.body;
+
+    const paylaoud = {
+      directoryName: capitalized(req.body.directoryName),
+      path: `/directory/${req.body.directoryName.toLowerCase()}`,
+    };
+
+    const vaildte = validUser(userID);
+    if (!vaildte)
+      return res
+        .status(404)
+        .json({ status: "fail", message: "user not't found" });
 
     const updatedDirectory = await dirModel.findByIdAndUpdate(
       { _id: id, userID: userID },
@@ -72,9 +96,15 @@ export const updateDir = async (req, res) => {
 
 export const deleteDir = async (req, res) => {
   try {
-    const { userID } = req.user;
+    const { _id } = req.user;
+    const userID = _id;
     const { id } = req.params;
 
+    const vaildte = validUser(userID);
+    if (!vaildte)
+      return res
+        .status(404)
+        .json({ status: "fail", message: "user not't found" });
     const deleted = await dirModel.findByIdAndDelete({
       _id: id,
       userID: userID,

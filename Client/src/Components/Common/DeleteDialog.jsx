@@ -9,27 +9,24 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
-import { removeDirectory } from "../../Redux/Reducers/directory.reducer";
-import {
-  removeTask,
-  removeTaskForDirectory,
-} from "../../Redux/Reducers/Task.reducer";
+import { removeTaskForDirectory } from "../../Redux/Reducers/task/Task.reducer";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
+import { removeTask } from "../../Redux/Reducers/task/task.thunk";
+import { removeDir } from "../../Redux/Reducers/directory/directory.thunk";
 
 export default function DeleteDialog({ info, handleClose, open }) {
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigate = useNavigate();
   const { id, title, discription, name, type } = info;
-
   const handleConfirm = () => {
     if (type === "directory") {
-      dispatch(removeDirectory(id));
+      dispatch(removeDir(`/user/directories/${id}`));
       dispatch(removeTaskForDirectory(name));
       navigate("/");
     } else if (type === "task") {
-      dispatch(removeTask(id));
+      dispatch(removeTask({ id: id, URL: `/user/tasks/${id}` }));
     }
     handleClose();
   };
@@ -43,8 +40,8 @@ export default function DeleteDialog({ info, handleClose, open }) {
           sx: {
             borderRadius: 3,
             width: "100%",
-            maxWidth: 400, 
-            mx: 1.5, 
+            maxWidth: 400,
+            mx: 1.5,
             p: { xs: 1, sm: 2 },
             backgroundImage: "none",
             bgcolor: theme.palette.customColors.bgDialog,

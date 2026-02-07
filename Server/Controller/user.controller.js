@@ -1,9 +1,14 @@
 import userModel from "../models/user.model.js";
 import verifyEmailModel from "../models/verifyEmail.model.js";
-import sendEamil from "../Lib/sendEmail.js";
+import sendEmail from "../Lib/sendEmail.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import dirModel from "../models/directory.model.js";
+
+const capitalized = (name) => {
+  return name[0].toUpperCase() + name.substring(1);
+};
 
 export const getAllUser = async (req, res) => {
   try {
@@ -21,14 +26,15 @@ export const getAllUser = async (req, res) => {
 
 export const registerNewUser = async (req, res) => {
   try {
-    const port = process.env.PORT || 5500;
     const { userName, email, password } = req.body;
     let user = await userModel.findOne({ email: email });
     if (user)
-      return res
-        .status(400)
-        .json({ message: "User with this email already exists." });
+      return res.status(400).json({
+        status: "fail",
+        message: "User with this email already exists.",
+      });
 
+    console.log({ userName, email, password });
     const newUser = {
       userName: userName,
       email: email,
@@ -41,8 +47,19 @@ export const registerNewUser = async (req, res) => {
       userID: id,
       token: crypto.randomBytes(32).toString("hex"),
     });
+    console.log("token created: " + token);
 
-    const verificationLink = `http://localhost:${port}/api/user/verify-email?userID=${id}&token=${token}`;
+        //default directory:
+    await dirModel.create({
+      directoryName: capitalized("main"),
+      path: `/directory/main`,
+      userID: id,
+    });
+
+    console.log("dir created:");
+
+
+    const verificationLink = `${process.env.CLIENT_URL}/auth/verify-email?userid=${id}&token=${token}`;
 
     const emailHtml = `
             <h1>Welcome to Our App!</h1>
@@ -51,15 +68,22 @@ export const registerNewUser = async (req, res) => {
             <p>This link will expire in 2 minutes.</p>
         `;
 
-    await sendEamil(email, "Email Verification", emailHtml);
+    await sendEmail(email, "Email Verification", emailHtml);
 
-    res
-      .status(201)
-      .send(
-        "Registration successful. Please check your email to verify your account."
-      );
+    // //default directory:
+    // await dirModel.create({
+    //   directoryName: capitalized("main"),
+    //   path: `/directory/main`,
+    //   userID: id,
+    // });
+
+    res.status(201).json({
+      status: "success",
+      message:
+        "Registration successful. Please check your email to verify your account.",
+    });
   } catch (error) {
-    console.log(`register new user has error: ${error}`);
+    console.log(`register controller new user has error: ${error}`);
     res.status(500).json({
       status: "fail",
       message: "Internal Server Error",
@@ -69,28 +93,89 @@ export const registerNewUser = async (req, res) => {
 
 export const verifyUserEmail = async (req, res) => {
   try {
-    const { userID, token } = req.query;
-    const validUser = await userModel.findById(userID);
+    const { userid, token } = req.validatedQuery;
+    const validUser = await userModel.findById(userid);
     if (!validUser)
-      return res.status(400).send("Invalid link: User not found.");
+      return res
+        .status(400)
+        .json({ status: "fail", message: "Invalid link: User not found." });
 
     const verifyToken = await verifyEmailModel.findOne({
-      userID: userID,
+      userID: userid,
       token: token,
     });
+
     if (!verifyToken) {
-      await userModel.deleteOne({ _id: userID });
-      return res.status(400).send("Invalid or expired link.");
+      return res.status(validUser.verified ? 200 : 400).json({
+        status: validUser.verified ? "success" : "fail",
+        message: validUser.verified
+          ? "Your email is already verified. You can sign in."
+          : "Invalid or expired verification link.",
+      });
     }
 
     await Promise.all([
-      userModel.updateOne({ _id: userID }, { verified: true }),
-      verifyEmailModel.deleteOne({ userID: userID }),
+      userModel.updateOne({ _id: userid }, { verified: true }),
+      verifyEmailModel.deleteOne({ userID: userid }),
     ]);
 
-    res.status(200).send("Email verified successfully. You can now log in.");
+    res.status(200).json({
+      status: "success",
+      message: "Email verified successfully. You can now Sign in.",
+    });
   } catch (error) {
     console.log(`verify user email has error: ${error}`);
+    res.status(500).json({
+      status: "fail",
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await userModel.findOne({ email: email });
+
+    //if user don't sign up
+    if (!user)
+      return res
+        .status(400)
+        .json({ status: "fail", message: "you should sign up first." });
+
+    const { _id: id, verified } = user;
+
+    // if user verified
+    if (verified === true)
+      return res
+        .status(400)
+        .json({ status: "fail", message: "your email already verified." });
+
+    // remove old tokens
+    await verifyEmailModel.deleteMany({ userID: id });
+
+    const { token } = await verifyEmailModel.create({
+      userID: id,
+      token: crypto.randomBytes(32).toString("hex"),
+    });
+
+    const verificationLink = `${process.env.CLIENT_URL}/auth/verify-email?userid=${id}&token=${token}`;
+
+    const emailHtml = `
+            <h1>Welcome to Our App!</h1>
+            <p>Please click on the link below to verify your email address:</p>
+            <a href="${verificationLink}">Verify My Email</a>
+            <p>This link will expire in 2 minutes.</p>
+        `;
+
+    await sendEmail(email, "Email Verification", emailHtml);
+
+    res.status(201).json({
+      status: "success",
+      message: "Verification link has been sent to your email.",
+    });
+  } catch (error) {
+    console.log(`redend link email controller has new error: ${error}`);
     res.status(500).json({
       status: "fail",
       message: "Internal Server Error",
@@ -114,13 +199,18 @@ export const loginUser = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).send("Authentication failed.");
 
+    console.log("valied login");
+
     const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "1h",
     });
 
-    res
-      .header("Authorization", token)
-      .send({ message: "Logged in successfully.", token: token });
+    res.status(200).header("Authorization", token).json({
+      status: "success",
+      info: user.userName,
+      message: "Logged in successfully.",
+      token: token,
+    });
   } catch (error) {
     console.log(`Login User has error: ${error}`);
     res.status(500).json({

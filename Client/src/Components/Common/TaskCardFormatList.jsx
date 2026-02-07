@@ -14,30 +14,46 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteDialog from "./DeleteDialog";
 import { useDispatch } from "react-redux";
-import {
-  isCompletedTask,
-  isImportantTask,
-} from "../../Redux/Reducers/Task.reducer";
 import { useState } from "react";
 import TaskFormDialog from "./taskForm/AddTaskForm";
+import { updateTask } from "../../Redux/Reducers/task/task.thunk";
 
 const TaskCardFormatList = ({ data }) => {
   const dispatch = useDispatch();
-  const { id, title, deadLine, description, directory, important, completed } =
-    data;
+  const {
+    _id: id,
+    title,
+    deadLine,
+    description,
+    dirName,
+    important,
+    completed,
+  } = data;
+
   const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
   const [isOpenFormDialog, setisOpenFormDialog] = useState("");
-  function handleImportant(id) {
-    dispatch(isImportantTask(id));
-  }
 
+  function handleImportant(id) {
+    dispatch(
+      updateTask({
+        data: { important: !important },
+        URL: `/user/tasks/${id}`,
+      })
+    );
+  }
   function handleCompleted(id) {
-    dispatch(isCompletedTask(id));
+    dispatch(
+      updateTask({
+        data: { completed: !completed },
+        URL: `/user/tasks/${id}`,
+      })
+    );
   }
 
   //handle delete Dialog:
   const handelDeleteDialog = async () => {
+    document.activeElement?.blur();
     setIsOpenDeleteDialog(true);
     setDeleteDialogInfo({
       type: "task",
@@ -73,7 +89,7 @@ const TaskCardFormatList = ({ data }) => {
           zIndex: 1000,
         }}
       >
-        {directory}
+        {dirName}
       </Box>
 
       {/* Main Card */}

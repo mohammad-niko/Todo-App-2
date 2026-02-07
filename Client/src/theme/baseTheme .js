@@ -1,9 +1,6 @@
 const baseTheme = {
   typography: {
     fontFamily: "'Inter', 'Roboto', sans-serif",
-    h5: {
-      fontWeight: 600,
-    },
     body1: {
       color: "#444",
     },

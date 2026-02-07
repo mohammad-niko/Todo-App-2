@@ -8,7 +8,7 @@ function DirectoryTasks() {
   const replace = name.replace(/-/g, " ");
 
   const tasks = useSelector((store) => store.Task.task).filter(
-    (t) => t.directory.toLowerCase() === replace.toLowerCase()
+    (t) => t.dirName.toLowerCase() === replace.toLowerCase()
   );
 
   return <TaskListRenderer tasks={tasks} />;

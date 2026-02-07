@@ -1,11 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
-import logger from "./middleware/Logger/logger.js";
+import requestLogger from "./middleware/Logger/requestLogger.js";
 import cors from "cors";
 import connectDb from "./db/connectDb.js";
 import dirRoute from "./Routes/directory.route.js";
 import taskRoute from "./Routes/task.route.js";
 import userRoute from "./Routes/user.route.js";
+import responseLogger from "./middleware/Logger/responseLogger.js";
+
 const server = express();
 dotenv.config();
 
@@ -13,10 +15,20 @@ const port = process.env.PORT || 5500;
 const URI = process.env.DB_URI;
 
 //middlewares:
-server.use(cors());
+server.use(
+  cors({
+    exposedHeaders: [
+      "RateLimit-Limit",
+      "RateLimit-Remaining",
+      "RateLimit-Reset",
+    ],
+  })
+);
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
-server.use(logger);
+
+server.use(requestLogger);
+server.use(responseLogger);
 
 //Routes:
 server.use("/api", dirRoute);

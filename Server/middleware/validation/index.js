@@ -1,8 +1,11 @@
 export const validateParams = (schemaFn) => async (req, res, next) => {
   try {
+    console.log(req.params);
     const schema = schemaFn();
     const result = await schema.safeParseAsync(req.params);
 
+    console.log("vaildte params start");
+console.log(result);
     if (!result.success)
       return res.status(400).json({
         status: "Fail",
@@ -11,10 +14,11 @@ export const validateParams = (schemaFn) => async (req, res, next) => {
           path: e.path,
         })),
       });
-    req.params = result.data;
+    req.id = result.data;
+    console.log("vaildte params fin");
     next();
   } catch (error) {
-    console.error("Validation Middleware Error:", err);
+    console.error("Validation Middleware Error:", error);
     return res
       .status(500)
       .json({ status: "Error", message: "Validation failed" });
@@ -24,8 +28,10 @@ export const validateParams = (schemaFn) => async (req, res, next) => {
 export const validateBody = (schemaFn) => async (req, res, next) => {
   try {
     const schema = schemaFn();
+    console.log(req.body);
     const result = await schema.safeParseAsync(req.body);
-
+    console.log("vaildte body start");
+    console.log(result);
     if (!result.success)
       return res.status(400).json({
         status: "Fail",
@@ -35,9 +41,11 @@ export const validateBody = (schemaFn) => async (req, res, next) => {
         })),
       });
     req.body = result.data;
+    console.log("vaildte body fin");
+
     next();
   } catch (error) {
-    console.error("Validation Middleware Error:", err);
+    console.error("Validation Middleware Error:", error);
     return res
       .status(500)
       .json({ status: "Error", message: "Validation failed" });
@@ -47,6 +55,7 @@ export const validateBody = (schemaFn) => async (req, res, next) => {
 export const validateQuery = (schemaFn) => async (req, res, next) => {
   try {
     const schema = schemaFn();
+
     const result = await schema.safeParseAsync(req.query);
 
     if (!result.success)
@@ -57,10 +66,11 @@ export const validateQuery = (schemaFn) => async (req, res, next) => {
           path: e.path,
         })),
       });
-    req.query = result.data;
+    req.validatedQuery = result.data;
+
     next();
   } catch (error) {
-    console.error("Validation Middleware Error:", err);
+    console.error("Validation Middleware Error:", error);
     return res
       .status(500)
       .json({ status: "Error", message: "Validation failed" });

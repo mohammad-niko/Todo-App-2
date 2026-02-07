@@ -12,26 +12,41 @@ import StarIcon from "@mui/icons-material/Star";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useDispatch } from "react-redux";
-import {
-  isCompletedTask,
-  isImportantTask,
-} from "../../Redux/Reducers/Task.reducer";
 import { useState } from "react";
 import DeleteDialog from "./DeleteDialog";
 import TaskFormDialog from "./taskForm/AddTaskForm";
+import { updateTask } from "../../Redux/Reducers/task/task.thunk";
 
 export default function TaskCardAppList({ data }) {
   const dispatch = useDispatch();
-  const { id, title, deadLine, description, directory, important, completed } =
-    data;
+  const {
+    _id: id,
+    title,
+    deadLine,
+    description,
+    dirName,
+    important,
+    completed,
+  } = data;
+
   const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
   const [isOpenFormDialog, setisOpenFormDialog] = useState("");
   function handleImportant(id) {
-    dispatch(isImportantTask(id));
+    dispatch(
+      updateTask({
+        data: { important: !important },
+        URL: `/user/tasks/${id}`,
+      })
+    );
   }
   function handleCompleted(id) {
-    dispatch(isCompletedTask(id));
+    dispatch(
+      updateTask({
+        data: { completed: !completed },
+        URL: `/user/tasks/${id}`,
+      })
+    );
   }
 
   //handle delete Dialog:
@@ -80,7 +95,7 @@ export default function TaskCardAppList({ data }) {
           zIndex: 0,
         }}
       >
-        {directory}
+        {dirName}
       </Box>
 
       {/* Main card */}
@@ -229,12 +244,13 @@ export default function TaskCardAppList({ data }) {
         handleClose={() => setIsOpenDeleteDialog(false)}
         open={isOpenDeleteDialog}
       />
-
-      <TaskFormDialog
-        open={isOpenFormDialog}
-        handleClose={handleFormDialog}
-        info={{ type: "edit", title: "Edit", id: id }}
-      />
+      {isOpenFormDialog && (
+        <TaskFormDialog
+          open={isOpenFormDialog}
+          handleClose={handleFormDialog}
+          info={{ type: "edit", title: "Edit", id: id }}
+        />
+      )}
     </Box>
   );
 }

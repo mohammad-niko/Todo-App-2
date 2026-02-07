@@ -1,8 +1,9 @@
 import taskModel from "../models/task.model.js";
+import dirModel from "../models/directory.model.js";
 
 export const taskList = async (req, res) => {
   try {
-    const { id: userID } = req.user;
+    const userID = req.user;
     const {
       page = 1,
       limit = 10,
@@ -58,16 +59,14 @@ export const taskList = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      data: {
-        tasks,
-        pagination: {
-          totalItems: totalCount,
-          totalPages: totalPages,
-          currentPage: page,
-          pageSize: limit,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-        },
+      tasks,
+      pagination: {
+        totalItems: totalCount,
+        totalPages: totalPages,
+        currentPage: page,
+        pageSize: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
       },
     });
   } catch (error) {
@@ -77,8 +76,8 @@ export const taskList = async (req, res) => {
 };
 export const getTasksByDirectoryId = async (req, res) => {
   try {
-    const { userID } = req.user;
-    const { dirID } = req.params;
+    const userID = req.user;
+    const { dirId } = req.params;
 
     const valid = await taskModel.find({ userID: userID, id: id });
     if (!valid)
@@ -87,7 +86,7 @@ export const getTasksByDirectoryId = async (req, res) => {
         .json({ status: "fail", message: "can't find tasks with this id" });
 
     const findTask = await taskModel
-      .find({ userID: userID, dirID: dirID })
+      .find({ userID: userID, dirID: dirId })
       .populate("dirID", "-_id directoryName");
 
     return res.status(200).json({
@@ -103,14 +102,18 @@ export const getTasksByDirectoryId = async (req, res) => {
 
 export const createTask = async (req, res) => {
   try {
-    const { userID } = req.user;
-    const { dirID } = req.params;
+    console.log("mmad");
+    const userID = req.user;
+    const { dirId } = req.id;
     const taskInfo = req.body;
-
-    const directory = await directoryModel.findOne({
-      dirID: dirID,
+    console.log(req.user);
+    console.log(`userID: ${userID} || dirID: ${dirId}`);
+    console.log("task crate controller");
+    const directory = await dirModel.findOne({
+      _id: dirId,
       userID: userID,
     });
+    console.log(directory.directoryName);
     if (!directory) {
       return res.status(404).json({ message: "Directory not found." });
     }
@@ -118,7 +121,8 @@ export const createTask = async (req, res) => {
     const task = {
       ...taskInfo,
       userID: userID,
-      dirID: dirID,
+      dirID: dirId,
+      dirName: directory.directoryName,
     };
 
     const createTask = await taskModel.create(task);
@@ -135,7 +139,7 @@ export const createTask = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
-    const { userID } = req.user;
+    const userID = req.user;
     const { id } = req.params;
     const paylaoud = req.body;
 

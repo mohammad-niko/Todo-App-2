@@ -22,17 +22,20 @@ const verifyToken = async (req, res, next) => {
     const currentUser = await userModel
       .findById({ _id: userID })
       .select("-password");
-console.log(userID);
 
     if (!currentUser)
       return res.status(401).json({
         status: "fail",
         message: "'Invalid Token. User does not exist.",
       });
-
-    req.user = currentUser;
+    const { _id } = currentUser;
+    req.user = _id;
+    console.log("auth.mid ok");
     next();
   } catch (error) {
+    console.log(error === "TokenExpiredError: jwt expired");
+    // if (error === "jwt expired")
+    //   return res.status(500).json({ status: "fail", message: error });
     console.log(`verify token middleware has error: ${error}`);
     res.status(500).json({ status: "fail", message: "Internal server error" });
   }

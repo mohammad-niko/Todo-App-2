@@ -16,10 +16,12 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
-import { changeThemeMode } from "../../Redux/Reducers/app.reducer";
+import { changeThemeMode } from "../../Redux/Reducers/app/app.reducer";
 import { useNavigate } from "react-router";
 import SearchDropdown from "../Common/SearchDropdown";
 import slugify from "slugify";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { cleanSignin } from "../../Redux/Reducers/user/user.reducer";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -109,10 +111,10 @@ export default function Header() {
     setValueDropdown("");
   }
 
-  function onResultClick({ title, id }) {
+  function onResultClick({ title, _id }) {
     const slug = slugify(title, { lower: true });
 
-    navigate(`/task/${id}/${slug}`);
+    navigate(`/task/${_id}/${slug}`);
     setSearchValue("");
     setValueDropdown("");
   }
@@ -150,25 +152,37 @@ export default function Header() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    dispatch(cleanSignin());
+    navigate("/auth/signin");
+  };
+
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
       anchorOrigin={{
-        vertical: "top",
+        vertical: "bottom",
         horizontal: "right",
       }}
       id={menuId}
       keepMounted
       transformOrigin={{
-        vertical: "top",
+        vertical: "bottom",
         horizontal: "right",
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <IconButton size="large" color="inherit">
+          <Badge color="error">
+            <AccountCircle />
+          </Badge>
+        </IconButton>
+        <p>Profile</p>
+      </MenuItem>
     </Menu>
   );
 
@@ -178,13 +192,13 @@ export default function Header() {
       anchorEl={mobileMoreAnchorEl}
       anchorOrigin={{
         vertical: "top",
-        horizontal: "right",
+        horizontal: "left",
       }}
       id={mobileMenuId}
       keepMounted
       transformOrigin={{
         vertical: "top",
-        horizontal: "right",
+        horizontal: "left",
       }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
@@ -209,6 +223,12 @@ export default function Header() {
           {/* <DarkModeIcon /> */}
         </IconButton>
         <p>Light</p>
+      </MenuItem>
+      <MenuItem onClick={handleLogout}>
+        <IconButton size="large" color="inherit">
+          <LogoutIcon />
+        </IconButton>
+        <p>Log out</p>
       </MenuItem>
     </Menu>
   );
@@ -247,6 +267,12 @@ export default function Header() {
             <Box sx={{ flexGrow: 1 }} />
 
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
+              {/* logout icon */}
+
+              <IconButton onClick={handleLogout} size="large" color="inherit">
+                <LogoutIcon />
+              </IconButton>
+
               {/* light and dark icons */}
               <IconButton
                 size="large"
@@ -258,7 +284,7 @@ export default function Header() {
                   },
                 }}
               >
-                <Badge>{theme ? <DarkModeIcon /> : <LightModeIcon />}</Badge>
+                {theme ? <DarkModeIcon /> : <LightModeIcon />}
               </IconButton>
 
               <IconButton size="large" color="inherit">

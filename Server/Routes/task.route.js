@@ -35,21 +35,21 @@ taskRoute.get(
   getTasksByDirectoryId
 );
 taskRoute.post(
-  "/user/:dirId/tasks",
+  "/user/directories/:dirId/tasks",
   verifyToken,
   validateParams(dirIDSchema),
   validateBody(CreatetaskSchema),
   createTask
 );
 taskRoute.patch(
-  "/user/tasks/id",
+  "/user/tasks/:id",
   verifyToken,
   validateParams(taskIDSchema),
   validateBody(updateTaskSchema),
   updateTask
 );
 taskRoute.delete(
-  "/user/tasks/id",
+  "/user/tasks/:id",
   verifyToken,
   validateParams(taskIDSchema),
   deleteTask

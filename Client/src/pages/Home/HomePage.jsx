@@ -5,7 +5,7 @@ import AddNewTaskCardFormat from "../../Components/Common/AddNewTaskCardFormat";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import TaskFormDialog from "../../Components/Common/taskForm/AddTaskForm";
-import { changeShowTask } from "../../Redux/Reducers/app.reducer";
+import { changeShowTask } from "../../Redux/Reducers/app/app.reducer";
 //Mui Components:
 import {
   Box,
@@ -20,6 +20,10 @@ import {
 } from "@mui/material";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import AppsIcon from "@mui/icons-material/Apps";
+import AllTasks from "./AllTasksPage";
+import { useEffect } from "react";
+import { getTaskList } from "../../Redux/Reducers/task/task.thunk";
+import { getAllDirs } from "../../Redux/Reducers/directory/directory.thunk";
 
 function Home() {
   const dispatch = useDispatch();
@@ -29,10 +33,17 @@ function Home() {
   const location = useLocation();
   const isInDirectoryPage = location.pathname === "/";
   const routeName = location.pathname;
-  const [isOpenFormDialog, setisOpenFormDialog] = useState("");
+  const [isOpenFormDialog, setisOpenFormDialog] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const [searchParams, setSearchParams] = useSearchParams("");
   const query = searchParams.get("search");
+  const safeQuery = query?.toLowerCase() || "";
+
+  // get task list and dirctory list:
+  useEffect(() => {
+    dispatch(getTaskList("/user/tasks"));
+    dispatch(getAllDirs("/user/directories"));
+  }, []);
 
   // handle change select Form (sort):
   const handelCahngeSortForm = (e) => {
@@ -64,8 +75,8 @@ function Home() {
   };
 
   const numberOfTasks = (pathName) => {
-  
     const { type, name } = getPageType(pathName);
+    const safeName = name?.toLowerCase() || "";
 
     switch (type) {
       case "all":
@@ -80,12 +91,12 @@ function Home() {
         return tasks.filter((t) => t.completed === false).length;
 
       case "directory":
-        return tasks.filter((t) => t.directory.toLowerCase() === name.toLowerCase()).length;
+        return tasks.filter((t) => t.dirName?.toLowerCase() === safeName)
+          .length;
 
       case "result":
-        return tasks.filter((t) =>
-          t.title.toLowerCase().includes(query.toLowerCase())
-        ).length;
+        return tasks.filter((t) => t.title?.toLowerCase().includes(safeQuery))
+          .length;
 
       default:
         return [].length;
@@ -108,7 +119,14 @@ function Home() {
           flexDirection: "column",
         }}
       >
-        <Typography variant="h5" sx={{ pl: 4, pt: 3 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            pl: 4,
+            pt: 3,
+            color: (theme) => theme.palette.primary.contrastText,
+          }}
+        >
           {count !== 0
             ? `${
                 routeName === "/" ? "All tasks" : convertPath(routeName)
@@ -134,8 +152,8 @@ function Home() {
             <IconButton
               sx={{
                 color: isList
-                  ? (theme) => theme.palette.primary.main
-                  : (theme) => theme.palette.text.disabled,
+                  ? theme.palette.primary.main
+                  : theme.palette.text.disabled,
                 px: 1,
                 py: 1,
               }}
@@ -150,8 +168,8 @@ function Home() {
             <IconButton
               sx={{
                 color: !isList
-                  ? (theme) => theme.palette.primary.main
-                  : (theme) => theme.palette.text.disabled,
+                  ? theme.palette.primary.main
+                  : theme.palette.text.disabled,
                 px: 1,
                 py: 1,
               }}
@@ -257,6 +275,10 @@ function Home() {
           }}
         >
           {/* children: */}
+
+          {/* all tasks:  */}
+          {isInDirectoryPage && <AllTasks />}
+
           <Outlet />
 
           {/* add task card */}
@@ -264,11 +286,13 @@ function Home() {
         </Box>
 
         {/* add task dialog */}
-        <TaskFormDialog
-          open={isOpenFormDialog}
-          handleClose={handleFormDialog}
-          info={{ type: "add", title: "Add New" }}
-        />
+        {isOpenFormDialog && (
+          <TaskFormDialog
+            open={isOpenFormDialog}
+            handleClose={handleFormDialog}
+            info={{ type: "add", title: "Add New" }}
+          />
+        )}
       </Box>
     </>
   );

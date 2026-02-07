@@ -6,7 +6,8 @@ import slugify from "slugify";
 function TaskDetails() {
   const tasks = useSelector((store) => store.Task.task);
   const { id, slug } = useParams();
-  const task = tasks.find((t) => t.id === Number(id));
+
+  const task = tasks.find((t) => t._id === id);
   const result = task ? [task] : [];
   if (task) {
     const correctSlug = slugify(task.title, { lower: true });

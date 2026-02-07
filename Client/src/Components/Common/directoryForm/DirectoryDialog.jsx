@@ -16,11 +16,11 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import directorySchema from "./directorySchema";
 import { useDispatch } from "react-redux";
+import { editTaskDirectory } from "../../../Redux/Reducers/task/Task.reducer";
 import {
-  createDirectory,
-  editDirectory,
-} from "../../../Redux/Reducers/directory.reducer";
-import { editTaskDirectory } from "../../../Redux/Reducers/Task.reducer";
+  createDir,
+  updataDir,
+} from "../../../Redux/Reducers/directory/directory.thunk";
 
 export default function DirectoryDialog({
   handleClose,
@@ -29,6 +29,7 @@ export default function DirectoryDialog({
   directoryList,
 }) {
   const { title, placeHolder, button, id } = info;
+
   const dispatch = useDispatch();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -45,12 +46,17 @@ export default function DirectoryDialog({
     document.activeElement?.blur();
 
     if (title === "Edit") {
-      dispatch(
-        editTaskDirectory({ newName: data.directoryName, oldName: placeHolder })
-      );
-      dispatch(editDirectory({ id, newName: data.directoryName }));
+      const dirData = { directoryName: data.directoryName };
+      dispatch(updataDir({ data: dirData, URL: `/user/directories/${id}` }));
     } else {
-      dispatch(createDirectory(data.directoryName));
+      const dirData = data.directoryName;
+
+      dispatch(
+        createDir({
+          data: { directoryName: dirData },
+          URL: `/user/directories`,
+        })
+      );
     }
 
     reset();
@@ -172,7 +178,6 @@ export default function DirectoryDialog({
                       borderColor: theme.palette.primary.main,
                     },
                   },
-                  "& .MuiInputBase-input": { py: 1.3, fontSize: "0.95rem" },
                   "& .MuiInputBase-input::placeholder": {
                     color: theme.palette.text.secondary,
                     opacity: 0.7,

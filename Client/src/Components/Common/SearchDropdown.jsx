@@ -74,10 +74,12 @@ export default function SearchDropdown({
       >
         <List disablePadding>
           {displayedResults.map((result, index) => (
-            <React.Fragment key={result.id}>
+            
+            <React.Fragment key={result._id}>
               <ListItemButton
                 onClick={() => {
                   if (results.length === 0) return handleNotFound();
+                  console.log(result);
                   onResultClick(result);
                 }}
                 sx={{

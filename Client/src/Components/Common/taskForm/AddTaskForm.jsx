@@ -23,12 +23,16 @@ import FolderIcon from "@mui/icons-material/Folder";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskFormSchema } from "./addTaskSchema";
-import { createTask, editTask } from "../../../Redux/Reducers/Task.reducer";
+
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import {
+  createTask,
+  updateTask,
+} from "../../../Redux/Reducers/task/task.thunk";
 
 /* -------------------------------- Make Date-------------------------------- */
 const formatDate = (date) => {
@@ -49,10 +53,6 @@ const getAccentGlow = (theme) =>
 const filledStyles = (theme) => ({
   borderRadius: 2,
   overflow: "hidden",
-  backgroundColor:
-    theme.palette.mode === "light"
-      ? theme.palette.grey[100]
-      : theme.palette.grey[900],
   transition: "0.2s ease",
 
   "&:hover": {
@@ -79,11 +79,15 @@ const filledStyles = (theme) => ({
 export default function TaskFormDialog({ open, handleClose, info }) {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { type, title, id } = info;
+  const { type, title, id, dirID } = info;
+  const { status, successMessage, error } = useSelector((store) => store.Task);
+  // console.log(
+  //   `status: ${status} || sucessMeassage: ${successMessage} || error: ${error}`
+  // );
+
   const task =
     type === "edit" &&
     useSelector((store) => store.Task.task).find((t) => t.id === id);
-
   const directorys = useSelector((store) => store.Directory.directory).map(
     (d) => d.directoryName
   );
@@ -97,6 +101,7 @@ export default function TaskFormDialog({ open, handleClose, info }) {
       important: false,
       completed: false,
     },
+    mode: "onBlur",
   });
 
   useEffect(() => {
@@ -125,22 +130,24 @@ export default function TaskFormDialog({ open, handleClose, info }) {
 
   const onSubmit = (data) => {
     if (type === "add") {
-      dispatch(
-        createTask({
-          ...data,
-          deadLine: formatDate(data.deadLine),
-          createdAt: formatDate(new Date()),
-        })
-      );
+      const URL = `/user/directories/6964d53a77ce6624971a8c04/tasks`;
+      const taskData = {
+        ...data,
+        deadLine: formatDate(data.deadLine),
+        createdAt: formatDate(new Date()),
+      };
+
+      dispatch(createTask({ data: taskData, URL }));
+      console.log(taskData, URL);
     } else if (type === "edit") {
-      dispatch(
-        editTask({
-          id,
-          ...data,
-          deadLine: data.deadLine ? formatDate(data.deadLine) : task.deadLine,
-          createdAt: formatDate(new Date()),
-        })
-      );
+      const newTaskData = {
+        id,
+        ...data,
+        deadLine: data.deadLine ? formatDate(data.deadLine) : task.deadLine,
+        createdAt: formatDate(new Date()),
+      };
+
+      dispatch(updateTask(newTaskData, `/user/tasks/${id}`));
     }
     handleClose();
   };
@@ -161,10 +168,6 @@ export default function TaskFormDialog({ open, handleClose, info }) {
             p: 0,
             boxShadow: `0 12px 40px ${getAccentGlow(theme)}`,
             backdropFilter: "blur(14px)",
-            border:
-              theme.palette.mode === "light"
-                ? "1px solid #e0e0e0"
-                : "1px solid #444",
           },
         },
       }}
@@ -327,15 +330,22 @@ export default function TaskFormDialog({ open, handleClose, info }) {
                           sx: {
                             bgcolor: getBgDialog(theme),
                             borderRadius: 2,
-                            boxShadow: `0 8px 20px ${getAccentGlow(theme)}`,
+                            color: (theme) =>
+                              theme.palette.primary.contrastText,
                           },
                         },
                       },
                     }}
                   >
-                    <MenuItem value="Main">Main</MenuItem>
                     {directorys.map((d) => (
-                      <MenuItem value={d}>{d}</MenuItem>
+                      <MenuItem
+                        sx={{
+                          color: (theme) => theme.palette.primary.contrastText,
+                        }}
+                        value={d}
+                      >
+                        {d}
+                      </MenuItem>
                     ))}
                   </Select>
                   <FormHelperText>{fieldState.error?.message}</FormHelperText>

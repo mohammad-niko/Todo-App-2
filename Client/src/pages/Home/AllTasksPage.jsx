@@ -2,7 +2,6 @@ import { useSelector } from "react-redux";
 import TaskListRenderer from "../../Components/Common/TaskListRenderer";
 import { useSearchParams } from "react-router";
 
-
 function AllTasks() {
   const tasks = useSelector((store) => store.Task.task);
   const [searchParams, setSearchParams] = useSearchParams();

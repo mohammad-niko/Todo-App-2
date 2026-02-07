@@ -7,7 +7,7 @@ const taskSchema = new Schema(
     title: { type: String, required: true, trim: true },
     deadLine: { type: Date, required: true },
     description: { type: String, required: true, trim: true },
-    userId: {
+    userID: {
       type: Schema.Types.ObjectId,
       ref: "users",
       required: true,
@@ -19,6 +19,7 @@ const taskSchema = new Schema(
       trim: true,
       required: true,
     },
+    dirName: { type: String, required: true, trim: true },
     important: { type: Boolean, default: false },
     completed: { type: Boolean, default: false },
   },

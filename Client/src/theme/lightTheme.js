@@ -9,7 +9,7 @@ let lightTheme = createTheme({
       main: "#7B3FF3",
       light: "#A577F8",
       dark: "#5A26B8",
-      contrastText: "#fff",
+      contrastText: "#000000ff",
     },
     secondary: {
       main: "#FF6584",

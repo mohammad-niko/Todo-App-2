@@ -32,7 +32,6 @@ let darkTheme = createTheme({
     },
 
     customColors: {
-      appbarBg: "#0F172A",
       appbarText: "#E5E7EB",
       drawerBg: "#0F172A",
       bodyBg: "#0B1120",

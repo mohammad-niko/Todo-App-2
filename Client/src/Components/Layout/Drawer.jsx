@@ -124,6 +124,8 @@ function ResponsiveDrawer() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
+        zIndex: 1000,
+        backgroundColor: (theme) => theme.palette.customColors.drawerBg,
       }}
     >
       {/* Header + Add button */}
@@ -203,7 +205,16 @@ function ResponsiveDrawer() {
               }}
             >
               <ListItemIcon sx={{ color: "inherit" }}>{icon}</ListItemIcon>
-              <ListItemText primary={label} />
+              <ListItemText
+                primary={label}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      color: (theme) => theme.palette.primary.contrastText,
+                    },
+                  },
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
@@ -253,14 +264,18 @@ function ResponsiveDrawer() {
                 primary="Directories"
                 slotProps={{
                   primary: {
-                    sx: { fontWeight: 500, fontSize: "1rem" },
+                    sx: {
+                      fontWeight: 500,
+                      fontSize: "1rem",
+                      color: (theme) => theme.palette.primary.contrastText,
+                    },
                   },
                 }}
               />
             </ListItemButton>
           </ListItem>
 
-          {directoriesOpen && (
+          {/* {directoriesOpen && (
             <ListItem disablePadding sx={{ pl: 6, py: 0.2 }}>
               <ListItemButton component={NavLink} to="/directory/main">
                 <ListItemText
@@ -273,11 +288,11 @@ function ResponsiveDrawer() {
                 />
               </ListItemButton>
             </ListItem>
-          )}
+          )} */}
 
           {directoriesOpen &&
-            listDirectories.map(({ id, directoryName, path }) => (
-              <ListItem key={id} disablePadding sx={{ pl: 6 }}>
+            listDirectories.map(({ _id, directoryName, path }) => (
+              <ListItem key={_id} disablePadding sx={{ pl: 6 }}>
                 <ListItemButton
                   component={NavLink}
                   to={path}
@@ -306,7 +321,7 @@ function ResponsiveDrawer() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleEditDirectory(id, directoryName);
+                        handleEditDirectory(_id, directoryName);
                       }}
                     >
                       <EditIcon sx={{ fontSize: "1rem" }} />
@@ -317,7 +332,7 @@ function ResponsiveDrawer() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleConfirmDeleteDialog(id, directoryName);
+                        handleConfirmDeleteDialog(_id, directoryName);
                       }}
                     >
                       <DeleteIcon sx={{ fontSize: "1rem" }} />
@@ -347,7 +362,7 @@ function ResponsiveDrawer() {
         </List>
       </Box>
 
-      {/* Progress Bar — stays bottom */}
+      {/* Progress Bar*/}
       <LinearWithValueLabel />
     </Box>
   );
