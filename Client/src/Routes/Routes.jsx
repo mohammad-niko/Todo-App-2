@@ -11,12 +11,19 @@ import SigninPage from "../pages/Signin/SigninPage";
 import SignupPage from "../pages/Signup/SignupPage";
 import VerifyEmailPage from "../pages/VerifyEmail/VerifyEmailPage";
 import VerifyEmailInfoPage from "../pages/VerifyEmailInfo/VerifyEmailInfo";
+import ProtectedauthRoute from "./ProtectedauthRoute";
 
 const Routes = [
-  { path: "/auth/signup", element: <SignupPage /> },
-  { path: "/auth/signin", element: <SigninPage /> },
-  { path: "/auth/verify-email", element: <VerifyEmailPage /> },
-  { path: "/auth/verify-email-info", element: <VerifyEmailInfoPage /> },
+  {
+    path: "/auth",
+    element: <ProtectedauthRoute />,
+    children: [
+      { path: "signup", element: <SignupPage /> },
+      { path: "signin", element: <SigninPage /> },
+      { path: "verify-email", element: <VerifyEmailPage /> },
+      { path: "verify-email-info", element: <VerifyEmailInfoPage /> },
+    ],
+  },
 
   {
     path: "/",
