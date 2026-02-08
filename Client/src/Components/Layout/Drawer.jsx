@@ -57,15 +57,15 @@ function ResponsiveDrawer() {
 
   const sidebarItems = [
     { label: "All Tasks", path: "/", icon: <ListAltIcon /> },
-    { label: "Important Tasks", path: "/important-task", icon: <StarIcon /> },
+    { label: "Important Tasks", path: "/important-task?importance=important&page=1", icon: <StarIcon /> },
     {
       label: "Completed Tasks",
-      path: "/completed-task",
+      path: "/completed-task?status=completed&page=1",
       icon: <TaskAltIcon />,
     },
     {
       label: "Uncompleted Tasks",
-      path: "/uncompleted-task",
+      path: "/uncompleted-task?status=uncompleted&page=1",
       icon: <PendingActionsIcon />,
     },
   ];
@@ -274,21 +274,6 @@ function ResponsiveDrawer() {
               />
             </ListItemButton>
           </ListItem>
-
-          {/* {directoriesOpen && (
-            <ListItem disablePadding sx={{ pl: 6, py: 0.2 }}>
-              <ListItemButton component={NavLink} to="/directory/main">
-                <ListItemText
-                  primary="Main"
-                  slotProps={{
-                    primary: {
-                      sx: { fontSize: "1rem", color: "text.secondary" },
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          )} */}
 
           {directoriesOpen &&
             listDirectories.map(({ _id, directoryName, path }) => (

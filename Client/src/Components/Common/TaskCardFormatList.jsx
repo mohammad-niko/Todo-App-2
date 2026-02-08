@@ -29,7 +29,7 @@ const TaskCardFormatList = ({ data }) => {
     important,
     completed,
   } = data;
-
+  const dataFormate = new Date(deadLine).toLocaleDateString("en-CA");
   const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
   const [isOpenFormDialog, setisOpenFormDialog] = useState("");
@@ -156,7 +156,7 @@ const TaskCardFormatList = ({ data }) => {
           <Stack direction="row" spacing={1} alignItems="center">
             <CalendarMonthIcon sx={{ fontSize: 18 }} />
             <Typography variant="body2" sx={{ fontSize: 13.5 }}>
-              {deadLine}
+              {dataFormate}
             </Typography>
           </Stack>
 

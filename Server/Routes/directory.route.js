@@ -5,13 +5,11 @@ import {
   listDirs,
   updateDir,
 } from "../Controller/directory.controller.js";
-
 import {
   createDirSchema,
   dirIDSchema,
   updateDirSchema,
 } from "../zodValidation/directory/directory.schema.js";
-
 import verifyToken from "../middleware/auth/auth.middleware.js";
 import {
   validateBody,

@@ -17,10 +17,14 @@ const verifyToken = async (req, res, next) => {
         message: "Access Denied. Token is missing.",
       });
     const secretKey = process.env.JWT_SECRET_KEY;
-    const { userID } = jwt.verify(token, secretKey);
+    if (!secretKey) {
+      throw new Error("JWT_SECRET_KEY is not defined");
+    }
+    
+    const decode = jwt.verify(token, secretKey);
 
     const currentUser = await userModel
-      .findById({ _id: userID })
+      .findById({ _id: decode.userID })
       .select("-password");
 
     if (!currentUser)
@@ -28,14 +32,25 @@ const verifyToken = async (req, res, next) => {
         status: "fail",
         message: "'Invalid Token. User does not exist.",
       });
-    const { _id } = currentUser;
-    req.user = _id;
+
+    req.user = currentUser._id;
     console.log("auth.mid ok");
     next();
   } catch (error) {
-    console.log(error === "TokenExpiredError: jwt expired");
-    // if (error === "jwt expired")
-    //   return res.status(500).json({ status: "fail", message: error });
+    console.log(error.name);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        status: "fail",
+        message: "Token expired. Please login again.",
+      });
+    }
+
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        status: "fail",
+        message: "Invalid token.",
+      });
+    }
     console.log(`verify token middleware has error: ${error}`);
     res.status(500).json({ status: "fail", message: "Internal server error" });
   }

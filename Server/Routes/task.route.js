@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   createTask,
   deleteTask,
-  getTasksByDirectoryId,
   taskList,
   updateTask,
 } from "../Controller/task.controller.js";
@@ -28,12 +27,12 @@ taskRoute.get(
   validateQuery(gettaskQuerySchema),
   taskList
 );
-taskRoute.get(
-  "/user/directories/:dirid/tasks",
-  verifyToken,
-  validateParams(dirIDSchema),
-  getTasksByDirectoryId
-);
+// taskRoute.get(
+//   "/user/directories/:dirid/tasks",
+//   verifyToken,
+//   validateParams(dirIDSchema),
+//   getTasksByDirectoryId
+// );
 taskRoute.post(
   "/user/directories/:dirId/tasks",
   verifyToken,

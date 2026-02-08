@@ -1,12 +1,8 @@
 import { useSelector } from "react-redux";
 import TaskListRenderer from "../../Components/Common/TaskListRenderer";
 
-
 function CompletedTask() {
-  const tasks = useSelector((store) => store.Task.task).filter(
-    (t) => t.completed === true
-  );
-
+  const { task: tasks } = useSelector((store) => store.Task);
   return <TaskListRenderer tasks={tasks} />;
 }
 

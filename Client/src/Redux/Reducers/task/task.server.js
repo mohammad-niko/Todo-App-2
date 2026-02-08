@@ -2,7 +2,6 @@ import axiosInstance from "../../../Api/axiosInstance";
 
 export const getTask = async (URL) => {
   const res = await axiosInstance.get(URL);
-
   return res;
 };
 export const postTask = async (data, URL) => {

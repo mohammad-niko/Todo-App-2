@@ -1,7 +1,7 @@
 import { validUser } from "../common/utils/index.js";
 import dirModel from "../models/directory.model.js";
 
-const capitalized = (name) => {
+export const capitalized = (name) => {
   return name[0].toUpperCase() + name.substring(1);
 };
 

@@ -20,7 +20,6 @@ export const createDir = createAsyncThunk(
   async ({ data, URL }, { rejectWithValue }) => {
     try {
       const res = await postDir(data, URL);
-      console.log(res);
       return res.data;
     } catch (error) {
       return rejectWithValue({

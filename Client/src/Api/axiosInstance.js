@@ -16,4 +16,17 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+axiosInstance.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    console.log(error.response);
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/auth/signin";
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 export default axiosInstance;

@@ -1,5 +1,6 @@
 import taskModel from "../models/task.model.js";
 import dirModel from "../models/directory.model.js";
+import { capitalized } from "./directory.controller.js";
 
 export const taskList = async (req, res) => {
   try {
@@ -11,11 +12,15 @@ export const taskList = async (req, res) => {
       status = "all",
       sort = "normal",
       search = "",
+      dirtasks = "",
     } = req.query;
 
     const query = { userID: userID };
     if (search) {
       query.title = new RegExp(search, "i");
+    }
+    if (dirtasks) {
+      query.dirName = capitalized(dirtasks);
     }
     if (status === "completed") {
       query.completed = true;
@@ -74,31 +79,31 @@ export const taskList = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-export const getTasksByDirectoryId = async (req, res) => {
-  try {
-    const userID = req.user;
-    const { dirId } = req.params;
+// export const getTasksByDirectoryId = async (req, res) => {
+//   try {
+//     const userID = req.user;
+//     const { dirId } = req.params;
 
-    const valid = await taskModel.find({ userID: userID, id: id });
-    if (!valid)
-      return res
-        .status(404)
-        .json({ status: "fail", message: "can't find tasks with this id" });
+//     const valid = await taskModel.find({ userID: userID, id: id });
+//     if (!valid)
+//       return res
+//         .status(404)
+//         .json({ status: "fail", message: "can't find tasks with this id" });
 
-    const findTask = await taskModel
-      .find({ userID: userID, dirID: dirId })
-      .populate("dirID", "-_id directoryName");
+//     const findTask = await taskModel
+//       .find({ userID: userID, dirID: dirId })
+//       .populate("dirID", "-_id directoryName");
 
-    return res.status(200).json({
-      status: "success",
-      message: "Tasks fetched successfully",
-      tasks: findTask,
-    });
-  } catch (error) {
-    console.error({ message: "get dir tasks have error", error: error });
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+//     return res.status(200).json({
+//       status: "success",
+//       message: "Tasks fetched successfully",
+//       tasks: findTask,
+//     });
+//   } catch (error) {
+//     console.error({ message: "get dir tasks have error", error: error });
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 
 export const createTask = async (req, res) => {
   try {
@@ -151,7 +156,7 @@ export const updateTask = async (req, res) => {
     const update = await taskModel.findByIdAndUpdate(
       { userID: userID, _id: id },
       paylaoud,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     res.status(200).json({

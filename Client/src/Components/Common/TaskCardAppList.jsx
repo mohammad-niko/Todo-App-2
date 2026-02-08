@@ -28,7 +28,7 @@ export default function TaskCardAppList({ data }) {
     important,
     completed,
   } = data;
-
+const dataFormate = new Date(deadLine).toLocaleDateString("en-CA");
   const [deleteDialogInfo, setDeleteDialogInfo] = useState({});
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
   const [isOpenFormDialog, setisOpenFormDialog] = useState("");
@@ -161,7 +161,7 @@ export default function TaskCardAppList({ data }) {
             >
               <CalendarTodayOutlinedIcon sx={{ fontSize: 16 }} />
               <Typography sx={{ fontSize: 13.5, color: "white" }}>
-                {deadLine}
+                {dataFormate}
               </Typography>
             </Stack>
 

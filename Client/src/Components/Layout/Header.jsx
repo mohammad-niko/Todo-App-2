@@ -268,7 +268,6 @@ export default function Header() {
 
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {/* logout icon */}
-
               <IconButton onClick={handleLogout} size="large" color="inherit">
                 <LogoutIcon />
               </IconButton>

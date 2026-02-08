@@ -119,16 +119,12 @@ const userSlice = createSlice({
         state.signup.error = null;
         state.signup.successMessage = null;
         state.signup.cooldownUntil = null;
-      }
+      },
     );
     //sign up and resend verify email rejected:
     builder.addMatcher(
       isAnyOf(signupUser.rejected, reSendVerifyEmail.rejected),
       (state, action) => {
-        console.log(
-          "signupUser.rejected, verifyUser.rejected payload:",
-          action.payload
-        );
         state.signup.status = FAILED;
         state.signup.error = action.payload.message;
         state.signup.successMessage = null;
@@ -137,7 +133,7 @@ const userSlice = createSlice({
         if (action.payload.type === "RATE_LIMIT") {
           state.signup.cooldownUntil = action.payload.rateLimitReset;
         }
-      }
+      },
     );
   },
 });

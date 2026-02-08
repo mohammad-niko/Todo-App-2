@@ -81,16 +81,12 @@ export default function TaskFormDialog({ open, handleClose, info }) {
   const dispatch = useDispatch();
   const { type, title, id, dirID } = info;
   const { status, successMessage, error } = useSelector((store) => store.Task);
-  // console.log(
-  //   `status: ${status} || sucessMeassage: ${successMessage} || error: ${error}`
-  // );
 
   const task =
     type === "edit" &&
     useSelector((store) => store.Task.task).find((t) => t.id === id);
-  const directorys = useSelector((store) => store.Directory.directory).map(
-    (d) => d.directoryName
-  );
+  const dirs = useSelector((store) => store.Directory.directory);
+  const directorys = dirs.map((d) => d.directoryName);
   const { control, handleSubmit, reset, watch } = useForm({
     resolver: zodResolver(taskFormSchema(directorys)),
     defaultValues: {
@@ -130,15 +126,17 @@ export default function TaskFormDialog({ open, handleClose, info }) {
 
   const onSubmit = (data) => {
     if (type === "add") {
-      const URL = `/user/directories/6964d53a77ce6624971a8c04/tasks`;
+      const { _id } = dirs.find((d) => d.directoryName === data.directory);
+      const URL = `/user/directories/${_id}/tasks`;
       const taskData = {
         ...data,
         deadLine: formatDate(data.deadLine),
         createdAt: formatDate(new Date()),
       };
-
+      console.log(formatDate(data.deadLine));
+console.log("data");
+console.log(taskData);
       dispatch(createTask({ data: taskData, URL }));
-      console.log(taskData, URL);
     } else if (type === "edit") {
       const newTaskData = {
         id,

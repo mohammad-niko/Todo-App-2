@@ -6,6 +6,7 @@ export const getTaskList = createAsyncThunk(
   async (URL, { rejectWithValue }) => {
     try {
       const res = await getTask(URL);
+      console.log(res.data.pagination);
       return res.data;
     } catch (error) {
       return rejectWithValue({
@@ -49,7 +50,6 @@ export const createTask = createAsyncThunk(
 export const updateTask = createAsyncThunk(
   "task/updataTask",
   async ({ data, URL }, { rejectWithValue }) => {
-    console.log(data, URL);
     try {
       const res = await patchaTask(data, URL);
 
@@ -67,7 +67,7 @@ export const removeTask = createAsyncThunk(
   async ({ id, URL }, { rejectWithValue }) => {
     try {
       const res = await deleteTask(URL);
-      console.log(res);
+
       return { ...res.data, id: id };
     } catch (error) {
       return rejectWithValue({

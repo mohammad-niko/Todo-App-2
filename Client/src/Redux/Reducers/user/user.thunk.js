@@ -50,7 +50,6 @@ export const reSendVerifyEmail = createAsyncThunk(
       return { message: res.message, rateLimitReset: res.rateLimitReset };
     } catch (error) {
       if (error.response?.status === 429) {
-        console.log(error.response.headers);
         return rejectWithValue({
           type: "RATE_LIMIT",
           message: error.response?.data?.message,

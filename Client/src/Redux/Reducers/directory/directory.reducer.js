@@ -72,7 +72,6 @@ const directorySlice = createSlice({
       ),
       (state, action) => {
         reset(state, LOADING);
-        console.log("pinding...");
       }
     );
     // rejected add matcher:

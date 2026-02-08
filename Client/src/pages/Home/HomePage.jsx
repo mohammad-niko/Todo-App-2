@@ -1,4 +1,10 @@
-import { Outlet, useLocation, useSearchParams } from "react-router";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
 import Header from "../../Components/Layout/Header";
 import AddNewTaskCardApp from "../../Components/Common//AddNewTaskCardApp";
 import AddNewTaskCardFormat from "../../Components/Common/AddNewTaskCardFormat";
@@ -14,6 +20,7 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
+  Pagination,
   Select,
   Typography,
   useTheme,
@@ -28,20 +35,36 @@ import { getAllDirs } from "../../Redux/Reducers/directory/directory.thunk";
 function Home() {
   const dispatch = useDispatch();
   const isList = useSelector((store) => store.App.showTask);
-  const tasks = useSelector((store) => store.Task.task);
+  const taskStore = useSelector((store) => store.Task);
+  const pagination = taskStore.pagination;
   const theme = useTheme();
   const location = useLocation();
   const isInDirectoryPage = location.pathname === "/";
+  const pathIstask = location.pathname.substring(1, 5) === "task";
   const routeName = location.pathname;
   const [isOpenFormDialog, setisOpenFormDialog] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const [searchParams, setSearchParams] = useSearchParams("");
   const query = searchParams.get("search");
   const safeQuery = query?.toLowerCase() || "";
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = 8;
+  const importance = searchParams.get("importance") || "all";
+  const status = searchParams.get("status") || "all";
+  const sort = searchParams.get("sort") || "normal";
+  const dirName = useParams().name || "";
 
-  // get task list and dirctory list:
+  // get task list:
   useEffect(() => {
-    dispatch(getTaskList("/user/tasks"));
+    dispatch(
+      getTaskList(
+        `/user/tasks?page=${page}&limit=${limit}&importance=${importance}&status=${status}&sort=${sort}&search=${safeQuery}&dirtasks=${dirName}`,
+      ),
+    );
+  }, [page, limit, importance, status, sort, dirName, safeQuery]);
+
+  // get dirctory list:
+  useEffect(() => {
     dispatch(getAllDirs("/user/directories"));
   }, []);
 
@@ -61,48 +84,8 @@ function Home() {
     return match[0].replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
   };
 
-  const getPageType = (pathName) => {
-    if (pathName === "/") return { type: "all" };
-    if (pathName === "/important-task") return { type: "important" };
-    if (pathName === "/completed-task") return { type: "completed" };
-    if (pathName === "/uncompleted-task") return { type: "uncompleted" };
-    if (pathName === "/result") return { type: "result" };
-
-    const match = pathName.match(/^\/directory\/(.+)/);
-    if (match) return { type: "directory", name: convertPath(match[1]) };
-
-    return { type: "unknown" };
-  };
-
-  const numberOfTasks = (pathName) => {
-    const { type, name } = getPageType(pathName);
-    const safeName = name?.toLowerCase() || "";
-
-    switch (type) {
-      case "all":
-        return tasks.length;
-      case "important":
-        return tasks.filter((t) => t.important === true).length;
-
-      case "completed":
-        return tasks.filter((t) => t.completed === true).length;
-
-      case "uncompleted":
-        return tasks.filter((t) => t.completed === false).length;
-
-      case "directory":
-        return tasks.filter((t) => t.dirName?.toLowerCase() === safeName)
-          .length;
-
-      case "result":
-        return tasks.filter((t) => t.title?.toLowerCase().includes(safeQuery))
-          .length;
-
-      default:
-        return [].length;
-    }
-  };
-  const count = numberOfTasks(routeName);
+  // const count = numberOfTasks(routeName);
+  const count = pagination.totalItems;
 
   function handleFormDialog() {
     document.activeElement?.blur();
@@ -128,12 +111,14 @@ function Home() {
           }}
         >
           {count !== 0
-            ? `${
-                routeName === "/" ? "All tasks" : convertPath(routeName)
-              } (${count} ${count > 1 ? "tasks" : "task"})`
+            ? pathIstask
+              ? convertPath(routeName)
+              : `${
+                  routeName === "/" ? "All tasks" : convertPath(routeName)
+                } (${count} ${count > 1 ? "tasks" : "task"})`
             : routeName === "/"
-            ? "All tasks"
-            : convertPath(routeName)}
+              ? "All tasks"
+              : convertPath(routeName)}
         </Typography>
         {/* //Toolbar: */}
         <Box
@@ -196,7 +181,7 @@ function Home() {
               sx={{
                 py: 1.5,
                 mr: 1,
-                display: { xl: "inline", sm: "none", md: "inline" },
+                display: { xs: "none", sm: "none", md: "inline" },
               }}
             >
               Add New Task
@@ -270,6 +255,10 @@ function Home() {
             display: "flex",
             flexDirection: isList ? "column" : "row",
             alignItems: isList ? "start" : "center",
+            justifyContent: {
+              xs: "center",
+              sm: "initial",
+            },
             flexWrap: isList ? "nowrap" : "wrap",
             gap: "15px",
           }}
@@ -283,6 +272,34 @@ function Home() {
 
           {/* add task card */}
           {isList ? <AddNewTaskCardFormat /> : <AddNewTaskCardApp />}
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 5,
+            mb: 1.5,
+          }}
+        >
+          <Pagination
+            count={pagination.totalPages}
+            color="primary"
+            onChange={(_, value) => {
+              setSearchParams((prev) => {
+                prev.set("page", value.toString());
+                return prev;
+              });
+            }}
+            sx={{
+              display:
+                Number(pagination.totalPages) === 1
+                  ? "none"
+                  : pathIstask
+                    ? "none"
+                    : "inline",
+            }}
+          />
         </Box>
 
         {/* add task dialog */}

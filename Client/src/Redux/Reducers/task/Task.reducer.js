@@ -1,5 +1,4 @@
 import { createSlice, isAnyOf } from "@reduxjs/toolkit";
-import { v4 as uuid } from "uuid";
 import {
   createTask,
   getEspecialTaskForDir,
@@ -23,6 +22,7 @@ const reset = (state, status, successMessage, error) => {
 
 const initialState = {
   task: [],
+  pagination: "",
   status: IDLE,
   error: null,
   successMessage: null,
@@ -46,22 +46,20 @@ const taskSlice = createSlice({
   extraReducers: (builder) => {
     //get list of task fulfilld:
     builder.addCase(getTaskList.fulfilled, (state, action) => {
-      action.payload.tasks.map((d) => state.task.push(d));
+      state.task = action.payload.tasks;
+      state.pagination = action.payload.pagination;
       reset(state, SUCCEEDED);
     });
     // create task fulfilld:
     builder.addCase(createTask.fulfilled, (state, action) => {
-      console.log(action.payload.task);
       state.task.unshift(action.payload.task);
       reset(state, SUCCEEDED, action.payload.message);
     });
     // update task fulfilld:
     builder.addCase(updateTask.fulfilled, (state, action) => {
-      console.log(action.payload.newTask._id);
       const index = state.task.findIndex(
         (t) => t._id === action.payload.newTask._id,
       );
-      console.log(index);
       state.task[index] = { ...state.task[index], ...action.payload.newTask };
       reset(state, SUCCEEDED, action.payload.message);
     });
@@ -71,7 +69,7 @@ const taskSlice = createSlice({
       state.task = state.task.filter((t) => t._id !== action.payload.id);
     });
     // get all task for especial dirctory:
-    builder.addCase(getEspecialTaskForDir.fulfilled, (state, action) => {});
+    // builder.addCase(getEspecialTaskForDir.fulfilled, (state, action) => {});
 
     //pending add matcher:
     builder.addMatcher(
@@ -83,7 +81,6 @@ const taskSlice = createSlice({
         removeTask.pending,
       ),
       (state) => {
-        console.log("pending...");
         state.status = LOADING;
         state.error = null;
         state.successMessage = null;

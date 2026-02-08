@@ -6,7 +6,6 @@ export const getDir = async (URL) => {
   return res;
 };
 export const postDir = async (data, URL) => {
-  console.log("URL: " + URL, "data: " + data);
   const res = await axiosInstance.post(URL, data);
 
   return res;
