@@ -11,7 +11,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import singupValidation from "./singupValidation";
-import { grey } from "@mui/material/colors";
+import { purple } from "@mui/material/colors";
 import { useDispatch, useSelector } from "react-redux";
 import { signupUser } from "../../Redux/Reducers/user/user.thunk";
 
@@ -29,7 +29,7 @@ const filledStyles = (theme) => ({
     backgroundColor:
       theme.palette.mode === "light"
         ? theme.palette.grey[200]
-        : theme.palette.grey[800],
+        : purple[100],
   },
 
   "&.Mui-focused": {

@@ -49,16 +49,6 @@ export const registerNewUser = async (req, res) => {
     });
     console.log("token created: " + token);
 
-        //default directory:
-    await dirModel.create({
-      directoryName: capitalized("main"),
-      path: `/directory/main`,
-      userID: id,
-    });
-
-    console.log("dir created:");
-
-
     const verificationLink = `${process.env.CLIENT_URL}/auth/verify-email?userid=${id}&token=${token}`;
 
     const emailHtml = `
@@ -69,13 +59,15 @@ export const registerNewUser = async (req, res) => {
         `;
 
     await sendEmail(email, "Email Verification", emailHtml);
+console.log("email sended successfuly");
+    //default directory:
+    await dirModel.create({
+      directoryName: capitalized("main"),
+      path: `/directory/main`,
+      userID: id,
+    });
 
-    // //default directory:
-    // await dirModel.create({
-    //   directoryName: capitalized("main"),
-    //   path: `/directory/main`,
-    //   userID: id,
-    // });
+    console.log("dir created:");
 
     res.status(201).json({
       status: "success",
@@ -84,6 +76,8 @@ export const registerNewUser = async (req, res) => {
     });
   } catch (error) {
     console.log(`register controller new user has error: ${error}`);
+    console.log("error:");
+    console.log(error);
     res.status(500).json({
       status: "fail",
       message: "Internal Server Error",
@@ -233,7 +227,7 @@ export const updateUser = async (req, res) => {
 
     const update = await userModel.findByIdAndUpdate(
       { _id: id },
-      { ...userInfo }
+      { ...userInfo },
     );
 
     res

@@ -18,6 +18,7 @@ import {
   useTheme,
   FormHelperText,
 } from "@mui/material";
+import { purple } from "@mui/material/colors";
 import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useForm, Controller } from "react-hook-form";
@@ -59,7 +60,7 @@ const filledStyles = (theme) => ({
     backgroundColor:
       theme.palette.mode === "light"
         ? theme.palette.grey[200]
-        : theme.palette.grey[800],
+        : purple[100],
   },
 
   "&.Mui-focused": {
@@ -134,8 +135,8 @@ export default function TaskFormDialog({ open, handleClose, info }) {
         createdAt: formatDate(new Date()),
       };
       console.log(formatDate(data.deadLine));
-console.log("data");
-console.log(taskData);
+      console.log("data");
+      console.log(taskData);
       dispatch(createTask({ data: taskData, URL }));
     } else if (type === "edit") {
       const newTaskData = {
