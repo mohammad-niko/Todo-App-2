@@ -50,7 +50,6 @@ const userSlice = createSlice({
   extraReducers: (builder) => {
     //sign up fulfilled:
     builder.addCase(signupUser.fulfilled, (state, action) => {
-      console.log("signupUser.fulfilled payload:", action.payload);
       state.signup.status = SUCCEEDED;
       state.signup.error = null;
       state.signup.successMessage = action.payload.message;
@@ -58,7 +57,6 @@ const userSlice = createSlice({
     });
     // resend verify email fulfilled:
     builder.addCase(reSendVerifyEmail.fulfilled, (state, action) => {
-      console.log("reSendVerifyEmail.fulfilled payload:", action.payload);
       state.signup.status = SUCCEEDED;
       state.signup.successMessage = action.payload.message;
       state.signup.error = null;
@@ -67,21 +65,18 @@ const userSlice = createSlice({
 
     //verify email pending:
     builder.addCase(verifyUser.pending, (state) => {
-      console.log("verifyUser.pending payload:");
       state.verifyEmail.status = LOADING;
       state.verifyEmail.successMessage = null;
       state.verifyEmail.error = null;
     });
     //verify email fulfilled:
     builder.addCase(verifyUser.fulfilled, (state, action) => {
-      console.log("verifyUser.fulfilled payload:", action.payload);
       state.verifyEmail.status = SUCCEEDED;
       state.verifyEmail.successMessage = action.payload.message;
       state.verifyEmail.error = null;
     });
     //verify email rejected:
     builder.addCase(verifyUser.rejected, (state, action) => {
-      console.log("verifyUser.rejected payload:", action.payload);
       state.verifyEmail.status = FAILED;
       state.verifyEmail.successMessage = null;
       state.verifyEmail.error = action.payload.message;
@@ -89,14 +84,12 @@ const userSlice = createSlice({
 
     // sign in pendig:
     builder.addCase(signinUser.pending, (state) => {
-      console.log("signinUser.pending");
       state.signin.status = LOADING;
       state.signin.successMessage = null;
       state.signin.error = null;
     });
     // sign in fulfilled:
     builder.addCase(signinUser.fulfilled, (state, action) => {
-      console.log("signinUser.fulfilled payload:", action.payload);
       state.data.userName = action.payload.info;
       state.token = action.payload.token;
       state.signin.status = SUCCEEDED;
@@ -105,7 +98,6 @@ const userSlice = createSlice({
     });
     // sign in rejected:
     builder.addCase(signinUser.rejected, (state, action) => {
-      console.log("signinUser.rejected payload:", action.payload);
       state.signin.status = FAILED;
       state.signin.successMessage = null;
       state.signin.error = action.payload.message;

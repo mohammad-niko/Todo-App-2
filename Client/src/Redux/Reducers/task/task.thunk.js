@@ -6,7 +6,6 @@ export const getTaskList = createAsyncThunk(
   async (URL, { rejectWithValue }) => {
     try {
       const res = await getTask(URL);
-      console.log(res.data.pagination);
       return res.data;
     } catch (error) {
       return rejectWithValue({

@@ -71,9 +71,29 @@ function Home() {
   // handle change select Form (sort):
   const handelCahngeSortForm = (e) => {
     setSortBy(e.target.value);
-    e.target.value
-      ? setSearchParams({ sort: e.target.value })
-      : setSearchParams({});
+
+    if (e.target.value) {
+      switch (e.target.value) {
+        case "important":
+          setSearchParams({ importance: e.target.value });
+          break;
+        case "uncompleted":
+          setSearchParams({ status: e.target.value });
+          break;
+        case "completed":
+          setSearchParams({ status: e.target.value });
+          break;
+        default:
+          setSearchParams({ sort: e.target.value });
+          break;
+      }
+    } else {
+      setSearchParams({});
+    }
+
+    // e.target.value
+    //   ? setSearchParams({ sort: e.target.value })
+    //   : ;
   };
 
   // Extract and Capitalize Pathname:
